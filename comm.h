@@ -74,3 +74,14 @@ int UDP_send_packet_socket(const char *packet_content,
   }
   return 0;
 }
+
+// this function will return the implement the coordinator server took
+// if -1, means connecting met error
+int RegisterThisServer(string target_addr,
+                       int target_port,
+                       string local_addr,
+                       int local_port,
+                       int socket_fd) {
+  string message_send = "RR";
+  return -1;
+}

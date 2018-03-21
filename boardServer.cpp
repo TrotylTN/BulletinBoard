@@ -43,12 +43,15 @@ int main() {
       printf("  3.Read-your-Write ​ consistency\nPlease enter your choice: ");
       cin >> mode_num;
       if (mode_num >= 1 && mode_num <= 3) {
+        // successfully get the valid mode number
         printf("\nThe server will be initialized in method <%d>\n\n");
         break;
       } else {
         printf("Invalid number entered! Try again.\n\n");
       }
     }
+
+    // start to initialize the coordinator server
 
   } else {
     // this server will be a regular server
@@ -57,8 +60,18 @@ int main() {
     printf("Please enter the port number for the coordinator server: ");
     cin >> coordinator_server_port;
     printf("This server will be initialized as a regular server\n");
-
-    printf("\n");
+    mode_num = RegisterThisServer(
+                 coordinator_server_addr,
+                 coordinator_server_port,
+                 local_ip_addr,
+                 local_port_num,
+                 local_socket_fd
+               );
+    if (mode_num == -1) {
+      printf("Failed to register this server to the coordinator\n");
+      printf("Exiting...\n");
+      return -1;
+    }
 
   }
 
