@@ -1,4 +1,4 @@
-#include "comm.h"
+#include "server_comm.h"
 
 string local_ip_addr;
 int local_port_num;
@@ -7,14 +7,6 @@ int local_socket_fd = 0;
 string coordinator_server_addr = "";
 int coordinator_server_port = 0;
 int mode_num = 0;
-
-// this function will return the implement the coordinator server took
-// if -1, means connecting met error
-int RegisterThisServer(void) {
-  string message_send = "RR";
-  return -1;
-}
-
 
 int main() {
   // get local IP address in string form via self-defined API
@@ -68,7 +60,13 @@ int main() {
     printf("Please enter the port number for the coordinator server: ");
     cin >> coordinator_server_port;
     printf("This server will be initialized as a regular server\n");
-    mode_num = RegisterThisServer();
+    mode_num = RegisterThisServer(
+      coordinator_server_addr,
+      coordinator_server_port,
+      local_ip_addr,
+      local_port_num,
+      local_socket_fd
+    );
     if (mode_num == -1) {
       printf("Failed to register this server to the coordinator\n");
       printf("Exiting...\n");

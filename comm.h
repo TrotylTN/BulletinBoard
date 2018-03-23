@@ -51,9 +51,9 @@ string get_local_IP(void) {
 
 // UDP help function implementation
 int UDP_send_packet_socket(const char *packet_content,
-                    const char *dest_IP,
-                    const unsigned short dest_port,
-                    int s) {
+                           const char *dest_IP,
+                           const unsigned short dest_port,
+                           int s) {
   struct sockaddr_in si_other;
   int slen=sizeof(si_other);
 

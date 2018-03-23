@@ -6,10 +6,10 @@ LDFLAGS = -lpthread
 all: BoardServer BoardClient
 
 
-BoardServer: boardServer.cpp comm.h
+BoardServer: boardServer.cpp comm.h server_comm.h
 	${CC} boardServer.cpp -o BoardServer ${LDFLAGS} ${CFLAGS}
 
-BoardClient: boardClient.cpp comm.h
+BoardClient: boardClient.cpp comm.h client_comm.h
 	${CC} boardClient.cpp -o BoardClient ${LDFLAGS} ${CFLAGS}
 
 clean:
