@@ -44,7 +44,8 @@ int main() {
       cin >> mode_num;
       if (mode_num >= 1 && mode_num <= 3) {
         // successfully get the valid mode number
-        printf("\nThe coordinator server will be initialized in method <%d>\n\n");
+        printf("\nThe coordinator server will be initialized in method <%d>\n",
+               mode_num);
         break;
       } else {
         printf("Invalid number entered! Try again.\n\n");
