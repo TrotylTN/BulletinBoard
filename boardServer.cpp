@@ -44,10 +44,29 @@ int main() {
       cin >> mode_num;
       if (mode_num >= 1 && mode_num <= 3) {
         // successfully get the valid mode number
-        printf("\nThe server will be initialized in method <%d>\n\n");
+        printf("\nThe coordinator server will be initialized in method <%d>\n\n");
         break;
       } else {
         printf("Invalid number entered! Try again.\n\n");
+      }
+      if (mode_num == 1) {
+        SequentialServerCoor(
+          local_ip_addr,
+          local_port_num,
+          local_socket_fd
+        );
+      } else if (mode_num == 2) {
+        QuorumServerCoor(
+          local_ip_addr,
+          local_port_num,
+          local_socket_fd
+        );
+      } else {
+        RAndWServerCoor(
+          local_ip_addr,
+          local_port_num,
+          local_socket_fd
+        );
       }
     }
 
@@ -72,7 +91,31 @@ int main() {
       printf("Exiting...\n");
       return -1;
     }
-
+    if (mode_num == 1) {
+      SequentialServer(
+        coordinator_server_addr,
+        coordinator_server_port,
+        local_ip_addr,
+        local_port_num,
+        local_socket_fd
+      );
+    } else if (mode_num == 2) {
+      QuorumServer(
+        coordinator_server_addr,
+        coordinator_server_port,
+        local_ip_addr,
+        local_port_num,
+        local_socket_fd
+      );
+    } else {
+      RAndWServer(
+        coordinator_server_addr,
+        coordinator_server_port,
+        local_ip_addr,
+        local_port_num,
+        local_socket_fd
+      );
+    }
   }
 
 }
