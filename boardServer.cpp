@@ -28,7 +28,7 @@ int main() {
     perror("socket bind error");
     return -1;
   }
-  printf("Local address is %s:%d\n\n", local_ip_addr.c_str(), local_port_num);
+  printf("Local address is <%s:%d>\n", local_ip_addr.c_str(), local_port_num);
   printf("Socket has been successfully initialized for the local address\n\n");
 
   printf("Is this server a coordinator server (Y/N): ");
