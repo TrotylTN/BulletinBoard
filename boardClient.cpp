@@ -46,6 +46,15 @@ int main() {
     printf("Enter the server port you want to connect: ");
     cin >> server_port_num;
 
+    // check whether the ip and port is valid
+    if (server_ip_addr.length () > 15 ||
+        server_port_num > 65535 ||
+        server_port_num < 0) {
+      printf("invalid address or invalid port number\n");
+      // re-start this loop
+      continue;
+    }
+
     int status_connection = PingThisServer(
       server_ip_addr,
       server_port_num,
