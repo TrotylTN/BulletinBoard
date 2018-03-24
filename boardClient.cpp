@@ -62,6 +62,17 @@ int main() {
         local_port_num,
         local_socket_fd
       );
+      printf("Disconnected from the server...\n");
+      printf("Do you want to re-connect? (Y/N): ");
+      string resp;
+      cin >> resp;
+      if (resp == "Y" or resp == "y") {
+        // do nothing, directly continue next loop iteration
+        printf("\n\n");
+      } else {
+        // back to the main program, Exiting the program
+        break;
+      }
     } else {
       printf("Cannot reach the server <%s:%d>\n",
              server_ip_addr.c_str(),
@@ -69,5 +80,7 @@ int main() {
       printf("Please try again\n\n");
     }
   }
+  close(local_socket_fd);
+  printf("The client is exiting.\n");
   return 0;
 }
