@@ -43,5 +43,27 @@ void BulletClient(string server_ip_addr,
                   int local_port_num,
                   int socket_fd) {
   // Start to run the client
+  printf("Successfully connected to server <%s:%d>\n",
+         server_ip_addr.c_str(),
+         server_port_num);
+  while (true) {
+    printf("\nPlease choose the opeartion you want:\n");
+    printf("  1.Post an article\n  2.Read the list for all articles & replies");
+    printf("\n  3.Choose an article/reply to view full content\n");
+    printf("  4.Reply to an article or a reply\n");
+    printf("Please enter your choice: ");
+    int choice_num;
+    cin >> choice_num;
+    if (choice_num == 1) {
 
+    } else if (choice_num == 2) {
+
+    } else if (choice_num == 3) {
+
+    } else if (choice_num == 4) {
+
+    } else {
+      printf("Wrong choice number, please try again\n");
+    }
+  }
 }
