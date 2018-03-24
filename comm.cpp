@@ -82,7 +82,7 @@ string FormPingPacket(string local_addr, int local_port, char msgstatus) {
   cur_len = res.length();
   res += string(22 - cur_len, ' ');
 
-  cerr << res << endl;
+  // cerr << res << endl;
   return res;
 }
 

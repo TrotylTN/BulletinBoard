@@ -66,7 +66,7 @@ int main() {
       printf("Cannot reach the server <%s:%d>\n",
              server_ip_addr.c_str(),
              server_port_num);
-      printf("Please try again");
+      printf("Please try again\n\n");
     }
   }
   return 0;
