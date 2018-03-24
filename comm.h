@@ -31,3 +31,7 @@ int UDP_send_packet_socket(const char *packet_content,
                            const char *dest_IP,
                            const unsigned short dest_port,
                            int s);
+
+
+string FormPingPacket(string local_addr, int local_port, char msgstatus);
+bool ParsePingPacket(string rev_packet);

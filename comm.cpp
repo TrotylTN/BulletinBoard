@@ -51,3 +51,33 @@ int UDP_send_packet_socket(const char *packet_content,
   }
   return 0;
 }
+
+/*
+ * Ping Sending Packet:
+ * P[0]: C
+ * P[1]: 'R' stands for this is a request, 'A' stands for this is an ACK
+ * P[2:17]: Source IP
+ * P[17:22]: Source port
+ * we assume all incoming args are valid
+ */
+string FormPingPacket(string local_addr, int local_port, char msgstatus) {
+  int cur_len;
+  string res = "C";
+  res.push_back(msgstatus);
+  // so far length should be 2
+  res += local_addr;
+  cur_len = res.length();
+  res += string(17 - cur_len, ' ');
+  // so far length should be 17
+  res += to_string(local_port);
+  cur_len = res.length();
+  res += string(22 - cur_len, ' ');
+
+  cerr << res << endl;
+  return res;
+}
+
+bool ParsePingPacket(string rev_packet) {
+  // if P[1] is 'A', it's an ACK
+  return (rev_packet[1] == 'A');
+}
