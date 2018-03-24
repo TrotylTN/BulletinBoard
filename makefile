@@ -12,5 +12,8 @@ BoardServer: boardServer.cpp comm.h comm.cpp server_comm.h server_comm.cpp serve
 BoardClient: boardClient.cpp comm.h comm.cpp client_comm.h client_comm.cpp
 	${CC} boardClient.cpp comm.cpp client_comm.cpp -o BoardClient ${LDFLAGS} ${CFLAGS}
 
+test: test.cpp
+	g++ test.cpp comm.cpp -o test -std=c++11
+
 clean:
 	rm -rf BoardServer BoardClient

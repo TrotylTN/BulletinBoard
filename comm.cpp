@@ -52,6 +52,15 @@ int UDP_send_packet_socket(const char *packet_content,
   return 0;
 }
 
+string remove_all_end_spaces(string s) {
+  int slen = s.length();
+  int i = slen - 1;
+  while (i >= 0 && s[i] == ' ')
+    i--;
+  s.erase(i + 1, slen - i - 1);
+  return s;
+}
+
 /*
  * Ping Sending Packet:
  * P[0]: C
@@ -77,7 +86,20 @@ string FormPingPacket(string local_addr, int local_port, char msgstatus) {
   return res;
 }
 
-bool ParsePingPacket(string rev_packet) {
+void ParsePingReqPacket(string rev_packet, string &remote_ip, int &remote_port){
+  // extract remote ip addr
+  remote_ip = rev_packet.substr(2, 15);
+  remote_ip = remove_all_end_spaces(remote_ip);
+
+  // extract remote port number
+  string remote_port_str = rev_packet.substr(17, 5);
+  remote_port_str = remove_all_end_spaces(remote_port_str);
+  remote_port = stoi (remote_port_str,nullptr);
+
+  return;
+}
+
+bool ParsePingACKPacket(string rev_packet) {
   // if P[1] is 'A', it's an ACK
   return (rev_packet[1] == 'A');
 }
