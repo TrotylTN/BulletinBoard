@@ -19,6 +19,16 @@ int main() {
     perror("creating socket failed");
     return -1;
   }
+
+  // set time out arg for the socket, timeout limit will be 5 sec
+  struct timeval tv;
+  tv.tv_sec = MAXTIMEOUTSEC;
+  tv.tv_usec = 0;
+  if (setsockopt(local_socket_fd, SOL_SOCKET, SO_RCVTIMEO,&tv,sizeof(tv)) < 0) {
+      perror("Set timeout error");
+  }
+
+  // bind the socket to the specific port
   memset((char *) &si_me, 0, sizeof(si_me));
   si_me.sin_family = AF_INET;
   si_me.sin_port = htons(local_port_num);

@@ -8,6 +8,7 @@
 #include <sys/types.h>
 #include <sys/ioctl.h>
 #include <sys/socket.h>
+#include <sys/time.h>
 #include <net/if.h>
 #include <netinet/in.h>
 #include <ifaddrs.h>
@@ -20,6 +21,7 @@
 
 #define MAXCLIENT 100
 #define MAXSERVER 100
+#define MAXTIMEOUTSEC 5
 
 using namespace std;
 
