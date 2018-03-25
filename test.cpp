@@ -31,4 +31,12 @@ int main() {
   ParseReadReplyPacket(readreply, i1, i2, i3, article);
   cout << i1 << ", "  << i2 << ", " << i3 << endl;
   cout << article << endl;
+
+  string viewreply = FormViewReplyPacket(22, 0, "hello thisis the full content");
+  cout << viewreply << endl;
+  ParseViewReplyPacket(readreply, i2, i3, article);
+  cout << i2 << ", " << i3 << endl;
+  cout << article << endl;
+
+
 }

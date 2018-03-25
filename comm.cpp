@@ -323,7 +323,7 @@ void ParseViewReqPacket(
  * P[9:]: the full content for the article/reply
  * we assume all incoming args are valid
  */
-string FormReadReplyPacket(
+string FormViewReplyPacket(
   int cur_num,
   int reply_to_num,
   string full_content
@@ -343,7 +343,7 @@ string FormReadReplyPacket(
   return res;
 }
 
-void ParseReadReplyPacket(
+void ParseViewReplyPacket(
   string recv_packet,
   int &cur_num,
   int &reply_to_num,
