@@ -158,13 +158,14 @@ void ParsePostReqPacket(string rev_packet,
 }
 
 /*
- * Ping Sending Packet:
+ * ReadReq Sending Packet:
  * P[0]: R
  * P[1:16]: Source IP
  * P[16:21]: Source port
+ * P[21:25]: Cache limit
  * we assume all incoming args are valid
  */
-string FormReadReqPacket(string local_addr, int local_port) {
+string FormReadReqPacket(string local_addr, int local_port, int cache_length) {
   string res;
   int cur_len;
   res = "R";
@@ -179,16 +180,85 @@ string FormReadReqPacket(string local_addr, int local_port) {
   res += string(21 - cur_len, ' ');
   // so far length should be 21
 
+  res += to_string(cache_length);
+  cur_len = res.length();
+  res += string(25 - cur_len, ' ');
+  // so far length should be 25
+
   return res;
 }
 
-void ParseReadReqPacket(string rev_packet, string &remote_ip, int &remote_port){
+void ParseReadReqPacket(
+  string rev_packet,
+  string &remote_ip,
+  int &remote_port,
+  int &cache_length
+) {
   // extract remote ip addr
   remote_ip = remove_all_end_spaces(rev_packet.substr(1, 15));
 
   // extract remote port number
   string remote_port_str = remove_all_end_spaces(rev_packet.substr(16, 5));
   remote_port = stoi (remote_port_str,nullptr);
+
+  // extract cache length
+  string cache_length_str = remove_all_end_spaces(rev_packet.substr(21, 4));
+  cache_length = stoi (cache_length_str,nullptr);
+
+  return;
+}
+
+/*
+ * ReadReq Sending Packet:
+ * P[0]: L
+ * P[1:5]: the updated list length (max 9999)
+ * P[5:9]: the number for the current article
+ * P[9:13]: the number this reply replies to (if article here will be 0)
+ * P[13:63]: first 50 characters abstract for this reply or article
+ * we assume all incoming args are valid
+ */
+string FormReadReplyPacket(
+  int new_list_length,
+  int cur_num,
+  int reply_to_num,
+  string first_50_abstract
+) {
+  string res = "L";
+
+  res += to_string(new_list_length);
+  res += string(5 - res.length(), ' ');
+  // should be 5 here
+
+  res += to_string(cur_num);
+  res += string(9 - res.length(), ' ');
+  // should be 9
+
+  res += to_string(reply_to_num);
+  res += string(13 - res.length(), ' ');
+  // should be 13
+
+  res += first_50_abstract;
+
+  return res;
+}
+
+void ParseReadReplyPacket(
+  string recv_packet,
+  int &new_list_length,
+  int &cur_num,
+  int &reply_to_num,
+  string &first_50_abstract
+) {
+  string new_length_str = remove_all_end_spaces(recv_packet.substr(1, 4));
+  new_list_length = stoi(new_length_str, nullptr);
+
+  string cur_num_str = remove_all_end_spaces(recv_packet.substr(5, 4));
+  cur_num = stoi(cur_num_str, nullptr);
+
+  string reply_to_num_str = remove_all_end_spaces(recv_packet.substr(9, 4));
+  reply_to_num = stoi(reply_to_num_str, nullptr);
+
+  first_50_abstract = recv_packet.substr(13);
 
   return;
 }

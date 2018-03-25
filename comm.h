@@ -48,5 +48,24 @@ void ParsePostReqPacket(string rev_packet,
                         int &reply_to_num,
                         string &article_content);
 
-string FormReadReqPacket(string local_addr, int local_port);
-void ParseReadReqPacket(string rev_packet, string &remote_ip, int &remote_port);
+string FormReadReqPacket(string local_addr, int local_port, int cache_length);
+void ParseReadReqPacket(
+  string rev_packet,
+  string &remote_ip,
+  int &remote_port,
+  int &cache_length
+);
+
+string FormReadReplyPacket(
+  int new_list_length,
+  int cur_num,
+  int reply_to_num,
+  string first_50_abstract
+);
+void ParseReadReplyPacket(
+  string recv_packet,
+  int &new_list_length,
+  int &cur_num,
+  int &reply_to_num,
+  string &first_50_abstract
+);

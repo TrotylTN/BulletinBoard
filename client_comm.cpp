@@ -42,6 +42,9 @@ void BulletClient(string server_ip_addr,
                   string local_ip_addr,
                   int local_port_num,
                   int socket_fd) {
+  // cache the list of all articles, just pass the needed information
+  int cache_length = 0;
+  pair<int, string> list_cache[10000];
   // Start to run the client
   printf("Successfully connected to server <%s:%d>\n",
          server_ip_addr.c_str(),
@@ -89,7 +92,11 @@ void BulletClient(string server_ip_addr,
       }
     } else if (choice_num == 2) {
       // form read request for current client
-      string ReadReq = FormReadReqPacket(local_ip_addr, local_port_num);
+      string ReadReq = FormReadReqPacket(
+        local_ip_addr,
+        local_port_num,
+        cache_length
+      );
       if (
         UDP_send_packet_socket(
           ReadReq.c_str(),
