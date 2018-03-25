@@ -156,3 +156,39 @@ void ParsePostReqPacket(string rev_packet,
 
   return;
 }
+
+/*
+ * Ping Sending Packet:
+ * P[0]: R
+ * P[1:16]: Source IP
+ * P[16:21]: Source port
+ * we assume all incoming args are valid
+ */
+string FormReadReqPacket(string local_addr, int local_port) {
+  string res;
+  int cur_len;
+  res = "R";
+
+  res += local_addr;
+  cur_len = res.length();
+  res += string(16 - cur_len, ' ');
+  // so far length should be 16
+
+  res += to_string(local_port);
+  cur_len = res.length();
+  res += string(21 - cur_len, ' ');
+  // so far length should be 21
+
+  return res;
+}
+
+void ParseReadReqPacket(string rev_packet, string &remote_ip, int &remote_port){
+  // extract remote ip addr
+  remote_ip = remove_all_end_spaces(rev_packet.substr(1, 15));
+
+  // extract remote port number
+  string remote_port_str = remove_all_end_spaces(rev_packet.substr(16, 5));
+  remote_port = stoi (remote_port_str,nullptr);
+
+  return;
+}

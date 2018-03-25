@@ -47,3 +47,6 @@ void ParsePostReqPacket(string rev_packet,
                         int &remote_port,
                         int &reply_to_num,
                         string &article_content);
+
+string FormReadReqPacket(string local_addr, int local_port);
+void ParseReadReqPacket(string rev_packet, string &remote_ip, int &remote_port);

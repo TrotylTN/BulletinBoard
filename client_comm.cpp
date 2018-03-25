@@ -88,6 +88,23 @@ void BulletClient(string server_ip_addr,
         );
       }
     } else if (choice_num == 2) {
+      // form read request for current client
+      string ReadReq = FormReadReqPacket(local_ip_addr, local_port_num);
+      if (
+        UDP_send_packet_socket(
+          ReadReq.c_str(),
+          server_ip_addr.c_str(),
+          server_port_num,
+          socket_fd
+        ) == -1
+      ) {
+        // met error in sending the packet out
+        printf("Error: met some error in sending request for Read\n");
+        continue;
+      }
+
+      // TODO: start to wait for response
+
     } else if (choice_num == 3) {
 
     } else if (choice_num == 4) {
