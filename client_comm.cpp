@@ -85,9 +85,10 @@ void BulletClient(string server_ip_addr,
           printf("Error: met some error in posting new article\n");
           continue;
         }
-        printf("Sent the post to the server <%s:%d>\n",
-               server_ip_addr.c_str(),
-               server_port_num
+        printf(
+          "Sent the post to the server <%s:%d>\n",
+          server_ip_addr.c_str(),
+          server_port_num
         );
       }
     } else if (choice_num == 2) {
@@ -152,6 +153,9 @@ void BulletClient(string server_ip_addr,
         printf("Received %d new articles/replies, updating...\n", new_length);
         list_cache[cur_num] = make_pair(reply_to_num, first_50_abstract);
         int rest_updates = cache_length - new_length - 1;
+        // update the new length for cache
+        cache_length = new_length;
+
         while (rest_updates > 0) {
           if (
             recvfrom(
@@ -184,6 +188,7 @@ void BulletClient(string server_ip_addr,
     } else if (choice_num == 3) {
       // choose an article or reply to view the full content
       if (cache_length == 0) {
+        printf("Error: Local cache is empty\n");
         printf("You must get the updated articles/replies list first\n");
         // back to the main menu
         continue;
@@ -266,7 +271,52 @@ void BulletClient(string server_ip_addr,
         cout << article_content << endl;
       }
     } else if (choice_num == 4) {
+      // create a new reply
+      if (cache_length == 0) {
+        printf("Error: Local cache is empty\n");
+        printf("You must get the updated articles/replies list first\n");
+        // back to the main menu
+        continue;
+      }
+      printf("For replying new articles/replies not in cache, ");
+      printf("you must Read the list for all articles & replies first\n");
+      printf("Please enter the article/reply you want to reply ");
+      printf("(Range from 1 to %d): ", cache_length);
+      int reply_to_num;
+      cin >> reply_to_num;
 
+      string article_content;
+      printf("Please enter your new reply's content for No.%d", article_num);
+      printf("(not longer than 4000 characters and end with Enter): ");
+      cin >> article_content;
+      if (article_content.length() > 4000) {
+        printf("Error: reply too long\n");
+        continue;
+      } else {
+        // reply_to_num is article_num now
+        string PostReq = FormPostPacket(
+          local_ip_addr,
+          local_port_num,
+          reply_to_num,
+          article_content
+        );
+        if (
+          UDP_send_packet_socket(
+            PostReq.c_str(),
+            server_ip_addr.c_str(),
+            server_port_num,
+            socket_fd
+          ) == -1
+        ) {
+          // met error in sending the packet out
+          printf("Error: met some error in replying an article\n");
+          continue;
+        }
+        printf(
+          "Sent the reply to the server <%s:%d>\n",
+          server_ip_addr.c_str(),
+          server_port_num
+        );
     } else {
       printf("Wrong choice number, please try again\n");
     }
