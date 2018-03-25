@@ -5,6 +5,7 @@ void SequentialServer(string coor_addr,
                       string self_addr,
                       int self_port,
                       int socket_fd) {
+  bool is_primary = false;
   // first: reply to #, second: content
   queue<pair<int, string> > to_be_assigned_articles;
   // first: remote ip addr, second: port num
@@ -52,7 +53,7 @@ void SequentialServer(string coor_addr,
           remote_port,
           socket_fd
         ) == -1) {
-        printf("Error: met error in sending the packet out");
+        printf("Error: met error in sending the PING ACK out");
         continue;
       }
       printf("ACK reply sent\n");
@@ -75,7 +76,19 @@ void SequentialServer(string coor_addr,
       );
       // queue this article until it got an unique number
       to_be_assigned_articles.push(make_pair(reply_to_num, article_content));
-      // TODO
+      // next step is to send a packet to coordinator server for id assignment
+      string NumReq = FormNumReqPacket(self_addr, self_port);
+      if (
+        UDP_send_packet_socket(
+          NumReq.c_str(),
+          coor_addr.c_str(),
+          coor_port,
+          socket_fd
+        ) == -1) {
+        printf("Error: met error in sending Num Request out");
+        continue;
+      }
+      printf("Unique ID Assignment for this article has been sent\n");
     } else if (req[0] == 'R') {
       // read request
     } else if (req[0] == 'V') {
