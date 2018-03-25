@@ -61,6 +61,12 @@ string remove_all_end_spaces(string s) {
   return s;
 }
 
+// print all caches out
+void PrintAllCaches(int n, pair<int, string> list_cache[10000]) {
+  // TODO
+  return;
+}
+
 /*
  * Ping Sending Packet:
  * P[0]: C

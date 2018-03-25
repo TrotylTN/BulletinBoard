@@ -34,6 +34,9 @@ int UDP_send_packet_socket(const char *packet_content,
 
 string remove_all_end_spaces(string s);
 
+// print all caches out
+void PrintAllCaches(int n, pair<int, string> list_cache[10000]);
+
 string FormPingPacket(string local_addr, int local_port, char msgstatus);
 void ParsePingReqPacket(string rev_packet, string &remote_ip, int &remote_port);
 bool ParsePingACKPacket(string rev_packet);

@@ -139,13 +139,43 @@ void BulletClient(string server_ip_addr,
         reply_to_num,
         first_50_abstract
       );
-      if (cur_num == 0) {
+      if (cur_num == 0 || cache_length - new_length == 0) {
         // no need to update, continue directly
         printf("Local cache is already updated, no need to update again\n");
-        // TODO: print all cache
       } else {
         // TODO: start a loop to receive
+        printf("Received %d new articles/replies, updating...\n", new_length);
+        list_cache[cur_num] = make_pair(reply_to_num, first_50_abstract);
+        int rest_updates = cache_length - new_length - 1;
+        while (rest_updates > 0) {
+          if (
+            recvfrom(
+              socket_fd,
+              buf,
+              4096,
+              0,
+              (struct sockaddr *) &si_other,
+              &socketlen
+            ) < 0
+          ) {
+            perror("Timeout or recvfrom error");
+            printf("Error: met some errors in receiving updates\n");
+            break;
+          }
+          readReply = string(buf);
+          ParseReadReplyPacket(
+            readReply,
+            new_length,
+            cur_num,
+            reply_to_num,
+            first_50_abstract
+          );
+          // update the cache
+          list_cache[cur_num] = make_pair(reply_to_num, first_50_abstract);
+          rest_updates--;
+        }
       }
+      PrintAllCaches(cache_length, list_cache);
 
     } else if (choice_num == 3) {
 
