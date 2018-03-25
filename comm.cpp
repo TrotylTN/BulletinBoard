@@ -111,7 +111,7 @@ bool ParsePingACKPacket(string rev_packet) {
 }
 
 /*
- * Ping Sending Packet:
+ * Post Sending Packet:
  * P[0]: P
  * P[1:16]: Source IP
  * P[16:21]: Source port
@@ -358,4 +358,54 @@ void ParseViewReplyPacket(
   full_content = recv_packet.substr(9);
 
   return;
+}
+
+/*
+ * NumReq Sending Packet:
+ * P[0]: N
+ * P[1:16]: Source IP
+ * P[16:21]: Source port
+ */
+string FormNumReqPacket(string local_addr, int local_port) {
+  string res = "N";
+
+  res += local_addr;
+  res += string(16 - res.length(), ' ');
+  // length should be 16 here
+
+  res += to_string(local_port);
+  res += string(21 - res.length(), ' ');
+  // should be 21 here
+
+  return res;
+}
+void ParseNumReqPacket(string recv_packet, string &remote_ip, int &remote_port){
+  // extract reomte ip address
+  remote_ip = remove_all_end_spaces(rev_packet.substr(1, 15));
+  // extract port number
+  string remote_port_str = remove_all_end_spaces(rev_packet.substr(16, 5));
+  remote_port = stoi (remote_port_str,nullptr);
+
+  return;
+}
+
+/*
+ * NumReq Sending Packet:
+ * P[0]: 0
+ * P[1:5]: Assigned number for the new article
+ */
+string FormNumReplyPacket(int assigned_num) {
+  string res = "0";
+
+  res += to_string(assigned_num);
+  res += string(5 - res.length(), ' ');
+  // should be 5 here
+  return res;
+}
+void ParseNumReplyPacket(string recv_packet, int &assigned_num) {
+  // extract assigned_num
+  string num_str = remove_all_end_spaces(rev_packet.substr(1, 4));
+  assigned_num = stoi (num_str,nullptr);
+
+  return
 }

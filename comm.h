@@ -92,3 +92,13 @@ void ParseViewReplyPacket(
   int &reply_to_num,
   string &full_content
 );
+
+string FormNumReqPacket(string local_addr, int local_port);
+void ParseNumReqPacket(
+  string recv_packet,
+  string &remote_ip,
+  int &remote_port
+);
+
+string FormNumReplyPacket(int assigned_num);
+void ParseNumReplyPacket(string recv_packet, int &assigned_num);
