@@ -268,3 +268,49 @@ void ParseReadReplyPacket(
 
   return;
 }
+
+/*
+ * ViewReq Sending Packet:
+ * P[0]: V
+ * P[1:16]: Source IP
+ * P[16:21]: Source port
+ * P[21:25]: Cache limit
+ * we assume all incoming args are valid
+ */
+string FormViewReqPacket(string local_addr, int local_port, int article_num) {
+  string res = "V";
+
+  res += local_addr;
+  res += string(16 - res.length(), ' ');
+  // so far length should be 16
+
+  res += to_string(local_port);
+  res += string(21 - res.length(), ' ');
+  // so far length should be 21
+
+  res += to_string(article_num);
+  res += string(25 - res.length(), ' ');
+  // so far length should be 25
+
+  return res;
+}
+
+void ParseViewReqPacket(
+  string rev_packet,
+  string &remote_ip,
+  int &remote_port,
+  int &article_num
+) {
+  // extract remote ip addr
+  remote_ip = remove_all_end_spaces(rev_packet.substr(1, 15));
+
+  // extract remote port number
+  string remote_port_str = remove_all_end_spaces(rev_packet.substr(16, 5));
+  remote_port = stoi (remote_port_str,nullptr);
+
+  // extract article number
+  string article_num_str = remove_all_end_spaces(rev_packet.substr(21, 4));
+  article_num = stoi (article_num_str,nullptr);
+
+  return;
+}

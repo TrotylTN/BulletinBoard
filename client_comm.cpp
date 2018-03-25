@@ -115,7 +115,7 @@ void BulletClient(string server_ip_addr,
         server_port_num
       );
 
-      // TODO: start to wait for response
+      // start to wait for response
       char buf[4096];
       struct sockaddr_in si_other;
       socklen_t socketlen = sizeof(si_other);
@@ -182,6 +182,44 @@ void BulletClient(string server_ip_addr,
       }
       PrintAllCaches(cache_length, list_cache);
     } else if (choice_num == 3) {
+      // choose an article or reply to view the full content
+      if (cache_length == 0) {
+        printf("You must get the updated articles/replies list first\n");
+        // back to the main menu
+        continue;
+      }
+      printf("For viewing new articles/replies not in cache, ");
+      printf("you must Read the list for all articles & replies first\n");
+      printf("Please enter the article/reply you want to view full content ");
+      printf("(Range from 1 to %d): ", cache_length);
+      int article_num;
+      cin >> article_num;
+      // create a ViewReq packet
+      string ViewReq = FormViewReqPacket(
+        local_ip_addr,
+        local_port_num,
+        articl
+      );
+      if (
+        UDP_send_packet_socket(
+          ViewReq.c_str(),
+          server_ip_addr.c_str(),
+          server_port_num,
+          socket_fd
+        ) == -1
+      ) {
+        // met error in sending the packet out
+        printf("Error: met some error in sending request for View\n");
+        continue;
+      }
+      printf(
+        "View request has been sent to the server <%s:%d>\n",
+        server_ip_addr.c_str(),
+        server_port_num
+      );
+
+      // start to receive response for ViewReq
+
 
     } else if (choice_num == 4) {
 
