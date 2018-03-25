@@ -28,7 +28,7 @@ int PingThisServer(string server_ip_addr,
                (struct sockaddr *) &si_other,
                &socketlen) < 0)
   {
-    perror("Timeout or Recfrom error");
+    perror("Timeout or recvfrom error");
     return -1;
   }
   string RecvPing = string(buf);
@@ -111,6 +111,41 @@ void BulletClient(string server_ip_addr,
       }
 
       // TODO: start to wait for response
+      char buf[4096];
+      struct sockaddr_in si_other;
+      socklen_t socketlen = sizeof(si_other);
+      if (
+        recvfrom(
+          socket_fd,
+          buf,
+          4096,
+          0,
+          (struct sockaddr *) &si_other,
+          &socketlen
+        ) < 0
+      ) {
+        perror("Timeout or recvfrom error");
+        printf("Error: met some errors in receiving updates\n");
+        continue;
+      }
+
+      string readReply = string(buf);
+      int new_length, cur_num, reply_to_num;
+      string first_50_abstract;
+      ParseReadReplyPacket(
+        readReply,
+        new_length,
+        cur_num,
+        reply_to_num,
+        first_50_abstract
+      );
+      if (cur_num == 0) {
+        // no need to update, continue directly
+        printf("Local cache is already updated, no need to update again\n");
+        // TODO: print all cache
+      } else {
+        // TODO: start a loop to receive
+      }
 
     } else if (choice_num == 3) {
 
