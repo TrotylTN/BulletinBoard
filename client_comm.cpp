@@ -286,14 +286,14 @@ void BulletClient(string server_ip_addr,
       cin >> reply_to_num;
 
       string article_content;
-      printf("Please enter your new reply's content for No.%d", article_num);
+      printf("Please enter your new reply's content for No.%d", reply_to_num);
       printf("(not longer than 4000 characters and end with Enter): ");
       cin >> article_content;
       if (article_content.length() > 4000) {
         printf("Error: reply too long\n");
         continue;
       } else {
-        // reply_to_num is article_num now
+        // send the reply to server now
         string PostReq = FormPostPacket(
           local_ip_addr,
           local_port_num,
@@ -317,6 +317,7 @@ void BulletClient(string server_ip_addr,
           server_ip_addr.c_str(),
           server_port_num
         );
+      }
     } else {
       printf("Wrong choice number, please try again\n");
     }
