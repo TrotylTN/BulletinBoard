@@ -262,7 +262,7 @@ void BulletClient(string server_ip_addr,
         } else {
           out_prefix = "Reply for Article/Reply No." + to_string(reply_to_num);
         }
-        printf("%d.(%s) ", out_prefix.c_str());
+        printf("%d.(%s) ", cur_num, out_prefix.c_str());
         cout << article_content << endl;
       }
     } else if (choice_num == 4) {
