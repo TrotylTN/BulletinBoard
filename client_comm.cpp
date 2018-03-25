@@ -219,8 +219,52 @@ void BulletClient(string server_ip_addr,
       );
 
       // start to receive response for ViewReq
+      char buf[4096];
+      struct sockaddr_in si_other;
+      socklen_t socketlen = sizeof(si_other);
+      if (
+        recvfrom(
+          socket_fd,
+          buf,
+          4096,
+          0,
+          (struct sockaddr *) &si_other,
+          &socketlen
+        ) < 0
+      ) {
+        perror("Timeout or recvfrom error");
+        printf("Error: met some errors in receiving full article\n");
+        continue;
+      }
 
+      string ViewReply = string(buf);
+      printf("Article / Reply received.\n");
 
+      int cur_num, reply_to_num;
+      string article_content;
+      ParseViewReplyPacket(
+        ViewReply,
+        cur_num,
+        reply_to_num,
+        article_content
+      );
+
+      if (cur_num != article_num) {
+        // this is not the article we requested
+        printf("Error: received wrong article, back to main menu\n");
+        continue;
+      } else {
+        // print the received content out
+        printf("Full content for Article / Reply No.%d:\n", cur_num);
+        string out_prefix;
+        if (reply_to_num == 0) {
+          out_prefix = "Article";
+        } else {
+          out_prefix = "Reply for Article/Reply No." + to_string(reply_to_num);
+        }
+        printf("%d.(%s) ", out_prefix.c_str());
+        cout << article_content << endl;
+      }
     } else if (choice_num == 4) {
 
     } else {
