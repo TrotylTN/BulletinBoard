@@ -109,6 +109,11 @@ void BulletClient(string server_ip_addr,
         printf("Error: met some error in sending request for Read\n");
         continue;
       }
+      printf(
+        "Read request has been sent to the server <%s:%d>\n",
+        server_ip_addr.c_str(),
+        server_port_num
+      );
 
       // TODO: start to wait for response
       char buf[4096];
@@ -176,7 +181,6 @@ void BulletClient(string server_ip_addr,
         }
       }
       PrintAllCaches(cache_length, list_cache);
-
     } else if (choice_num == 3) {
 
     } else if (choice_num == 4) {
