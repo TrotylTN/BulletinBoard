@@ -408,3 +408,43 @@ void ParseNumReplyPacket(string recv_packet, int &assigned_num) {
   assigned_num = stoi (num_str,nullptr);
   return;
 }
+
+string FormQueryReqPacket(
+  string local_addr,
+  int local_port,
+  char all_or_specific;
+  char abstract_or_full_content,
+  int from_which_article
+} {
+
+}
+
+void ParseQueryReqPacket(
+  string recv_packet,
+  string &remote_ip,
+  int &remote_port,
+  char &all_or_specific,
+  char &abstract_or_full_content,
+  int &from_which_article
+) {
+
+}
+
+string FormQueryReplyPacket(
+  int total_packet_sent,
+  int unique_id_this_article,
+  int reply_to_num,
+  string full_content
+) {
+
+}
+
+void ParseQueryReplyPacket(
+  string recv_packet,
+  int &total_packet_sent,
+  int &unique_id_this_article,
+  int &reply_to_num,
+  string &full_content
+) {
+  
+}
