@@ -198,7 +198,7 @@ void BulletClient(string server_ip_addr,
       string ViewReq = FormViewReqPacket(
         local_ip_addr,
         local_port_num,
-        articl
+        article_num
       );
       if (
         UDP_send_packet_socket(
