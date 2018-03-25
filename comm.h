@@ -80,3 +80,15 @@ void ParseViewReqPacket(
   int &remote_port,
   int &article_num
 );
+
+string FormViewReplyPacket(
+  int cur_num,
+  int reply_to_num,
+  string full_content
+);
+void ParseViewReplyPacket(
+  string recv_packet,
+  int &cur_num,
+  int &reply_to_num,
+  string &full_content
+);

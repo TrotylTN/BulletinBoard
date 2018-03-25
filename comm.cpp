@@ -215,7 +215,7 @@ void ParseReadReqPacket(
 }
 
 /*
- * ReadReq Sending Packet:
+ * readReply Sending Packet:
  * P[0]: L
  * P[1:5]: the updated list length (max 9999)
  * P[5:9]: the number for the current article
@@ -311,6 +311,51 @@ void ParseViewReqPacket(
   // extract article number
   string article_num_str = remove_all_end_spaces(rev_packet.substr(21, 4));
   article_num = stoi (article_num_str,nullptr);
+
+  return;
+}
+
+/*
+ * ViewReply Sending Packet:
+ * P[0]: F
+ * P[1:5]: the number for the current article
+ * P[5:9]: the number this reply replies to (if article here will be 0)
+ * P[9:]: the full content for the article/reply
+ * we assume all incoming args are valid
+ */
+string FormReadReplyPacket(
+  int cur_num,
+  int reply_to_num,
+  string full_content
+) {
+  string res = "F";
+
+  res += to_string(cur_num);
+  res += string(5 - res.length(), ' ');
+  // should be 5 here
+
+  res += to_string(reply_to_num);
+  res += string(9 - res.length(), ' ');
+  // should be 9
+
+  res += full_content;
+
+  return res;
+}
+
+void ParseReadReplyPacket(
+  string recv_packet,
+  int &cur_num,
+  int &reply_to_num,
+  string &full_content
+) {
+  string cur_num_str = remove_all_end_spaces(recv_packet.substr(1, 4));
+  cur_num = stoi(cur_num_str, nullptr);
+
+  string reply_to_num_str = remove_all_end_spaces(recv_packet.substr(5, 4));
+  reply_to_num = stoi(reply_to_num_str, nullptr);
+
+  full_content = recv_packet.substr(9);
 
   return;
 }
