@@ -404,8 +404,7 @@ string FormNumReplyPacket(int assigned_num) {
 }
 void ParseNumReplyPacket(string recv_packet, int &assigned_num) {
   // extract assigned_num
-  string num_str = remove_all_end_spaces(rev_packet.substr(1, 4));
+  string num_str = remove_all_end_spaces(recv_packet.substr(1, 4));
   assigned_num = stoi (num_str,nullptr);
-
-  return
+  return;
 }

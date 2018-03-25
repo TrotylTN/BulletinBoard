@@ -44,7 +44,7 @@ void SequentialServer(string coor_addr,
         remote_ip.c_str(),
         remote_port
       );
-      int PingACK = FormPingPacket(local_addr, local_port, 'A');
+      string PingACK = FormPingPacket(local_addr, local_port, 'A');
       if (
         UDP_send_packet_socket(
           PingACK.c_str(),
