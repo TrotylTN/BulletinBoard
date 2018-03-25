@@ -44,7 +44,7 @@ void SequentialServer(string coor_addr,
         remote_ip.c_str(),
         remote_port
       );
-      string PingACK = FormPingPacket(local_addr, local_port, 'A');
+      string PingACK = FormPingPacket(self_addr, self_port, 'A');
       if (
         UDP_send_packet_socket(
           PingACK.c_str(),
@@ -70,13 +70,11 @@ void SequentialServer(string coor_addr,
       );
       printf(
         "Received a Post request from <%s:%d>\n",
-        source_ip.c_str();
+        source_ip.c_str(),
         source_port
       );
       // queue this article until it got an unique number
-      to_be_assigned_articles.push_back(
-        make_pair(reply_to_num, article_content)
-      );
+      to_be_assigned_articles.push(make_pair(reply_to_num, article_content));
       // TODO
     } else if (req[0] == 'R') {
       // read request

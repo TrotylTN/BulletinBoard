@@ -381,7 +381,7 @@ string FormNumReqPacket(string local_addr, int local_port) {
 }
 void ParseNumReqPacket(string recv_packet, string &remote_ip, int &remote_port){
   // extract reomte ip address
-  remote_ip = remove_all_end_spaces(rev_packet.substr(1, 15));
+  remote_ip = remove_all_end_spaces(recv_packet.substr(1, 15));
   // extract port number
   string remote_port_str = remove_all_end_spaces(rev_packet.substr(16, 5));
   remote_port = stoi (remote_port_str,nullptr);
