@@ -37,3 +37,13 @@ string remove_all_end_spaces(string s);
 string FormPingPacket(string local_addr, int local_port, char msgstatus);
 void ParsePingReqPacket(string rev_packet, string &remote_ip, int &remote_port);
 bool ParsePingACKPacket(string rev_packet);
+
+string FormPostPacket(string local_addr,
+                      int local_port,
+                      int reply_to_num,
+                      string article_content);
+void ParsePostReqPacket(string rev_packet,
+                        string &remote_ip,
+                        int &remote_port,
+                        int &reply_to_num,
+                        string &article_content);

@@ -55,9 +55,39 @@ void BulletClient(string server_ip_addr,
     int choice_num;
     cin >> choice_num;
     if (choice_num == 1) {
-
+      string article_content;
+      printf("Please enter your new article's content (not longer than 4000");
+      printf(" characters and end with Enter): ");
+      cin >> article_content;
+      if (article_content.length() > 4000) {
+        printf("Error: article too long\n");
+        continue;
+      } else {
+        // reply_to_num is 0 because this is a new article
+        string PostReq = FormPostPacket(
+          local_ip_addr,
+          local_port_num,
+          0,
+          article_content
+        );
+        if (
+          UDP_send_packet_socket(
+            PostReq.c_str(),
+            server_ip_addr.c_str(),
+            server_port_num,
+            socket_fd
+          ) == -1
+        ) {
+          // met error in sending the packet out
+          printf("Error: met some error in posting new article\n");
+          continue;
+        }
+        printf("Sent the post to the server <%s:%d>\n",
+               server_ip_addr.c_str(),
+               server_port_num
+        );
+      }
     } else if (choice_num == 2) {
-
     } else if (choice_num == 3) {
 
     } else if (choice_num == 4) {

@@ -103,3 +103,56 @@ bool ParsePingACKPacket(string rev_packet) {
   // if P[1] is 'A', it's an ACK
   return (rev_packet[1] == 'A');
 }
+
+/*
+ * Ping Sending Packet:
+ * P[0]: P
+ * P[1:16]: Source IP
+ * P[16:21]: Source port
+ * P[21:25]: Reply-to number, if zero, means this is a new article\
+ * P[25:]: article content
+ * we assume all incoming args are valid
+ */
+string FormPostPacket(string local_addr,
+                      int local_port,
+                      int reply_to_num,
+                      string article_content) {
+  string res;
+  int cur_len;
+  res = "P";
+  res += local_addr;
+  cur_len = res.length();
+  res += string(16 - cur_len, ' ');
+  // so far length should be 16
+  res += to_string(local_port);
+  cur_len = res.length();
+  res += string(21 - cur_len, ' ');
+  // so far length should be 21
+  res += to_string(reply_to_num);
+  cur_len = res.length();
+  res += string(25 - cur_len, ' ');
+  // so far length should be 25
+  res += article_content;
+  return res;
+}
+
+void ParsePostReqPacket(string rev_packet,
+                        string &remote_ip,
+                        int &remote_port,
+                        int &reply_to_num,
+                        string &article_content) {
+  // extract remote ip addr
+  remote_ip = remove_all_end_spaces(rev_packet.substr(1, 15));
+
+  // extract remote port number
+  string remote_port_str = remove_all_end_spaces(rev_packet.substr(16, 5));
+  remote_port = stoi (remote_port_str,nullptr);
+
+  // extract reply_to_num
+  string reply_to_num_str = remove_all_end_spaces(rev_packet.substr(21, 4));
+  reply_to_num = stoi(reply_to_num_str, nullptr);
+
+  article_content = rev_packet.substr(25);
+
+  return;
+}
