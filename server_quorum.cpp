@@ -482,7 +482,12 @@ void QuorumServerCoor(string self_addr,
       }
     } else if (req[0] == 'Q') {
       // forward Query request to all Nr server
-      string reply_for_view_packet = "";
+      string reply_for_view_content = "";
+      int reply_for_view_id = 0;
+      int reply_for_view_replyto = 0;
+      string requester_ip;
+      int requester_port;
+
       char request_type;
 
       printf("Read request will be randomly sent to %d servers\n", Nr);
@@ -536,11 +541,16 @@ void QuorumServerCoor(string self_addr,
             request_type,
             full_content
           );
+          requester_ip = client_ip;
+          requester_port = client_port;
           if (request_type == 'V') {
             // this is a reply for View
-            if (full_content != "")
-            // mark the view packet
-              reply_for_view_packet = req;
+            if (reply_for_view_content != "") {
+              // mark the view packet
+              reply_for_view_id = unique_id;
+              reply_for_view_replyto = reply_to_num;
+              reply_for_view_content = full_content;
+            }
           } else {
             // this is replies for Read
             if (total_packets == 0) {
@@ -589,11 +599,32 @@ void QuorumServerCoor(string self_addr,
           continue;
         }
       }
-      // sending results back to requester server
+      // sending results back to requester
       if (request_type == 'V') {
-        // send this packet to the requester server
+        // send this packet to the requester
+        string ViewReply = FormViewReplyPacket(
+          reply_for_view_id,
+          reply_for_view_replyto,
+          reply_for_view_content
+        );
+        if (
+          UDP_send_packet_socket(
+            ViewReply.c_str(),
+            requester_ip.c_str(),
+            requester_port,
+            socket_fd
+          ) == -1) {
+          printf("Error: met error in sending View Reply out");
+          continue;
+        }
+        printf(
+          "No.%d full content sent to <%s:%d>\n",
+          reply_for_view_id,
+          requester_ip.c_str(),
+          requester_port
+        );
       } else {
-        // send all articles to the requester server
+        // send all articles to the requester
       }
     } else {
       printf("Received unauthorized request symbol \"%c\"\n", req[0]);
