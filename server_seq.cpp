@@ -111,7 +111,6 @@ void SequentialServer(string coor_addr,
 
         int total_packets = storage_length - start_position;
         if (total_packets <= 0) {
-          // TODO: send an empty packet to the client
           string ReadReply = FormReadReplyPacket(
             storage_length,
             0,
@@ -209,8 +208,22 @@ void SequentialServer(string coor_addr,
         article_num
       );
       if (is_primary) {
-        // TODO: use local storage to reply the client
-
+        string ViewReply = FormViewReplyPacket(
+          article_num,
+          article_storage[article_num].first,
+          article_storage[article_num].second
+        );
+        if (
+          UDP_send_packet_socket(
+            ViewReply.c_str(),
+            client_ip.c_str(),
+            client_port,
+            socket_fd
+          ) == -1) {
+          printf("Error: met error in sending View reply out");
+          continue;
+        }
+        printf("View Reply sent to <%s:%d>\n", client_ip.c_str(), client_port);
       } else {
         // queue the client into to_be_replied
         to_be_replied_view.push_back(make_pair(client_ip, client_port));
