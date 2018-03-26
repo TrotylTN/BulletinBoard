@@ -215,6 +215,97 @@ void SequentialServer(string coor_addr,
       // received a reply for a client's read/view request
     } else if (req[0] == 'Q' && is_primary == true) {
       // this is a primary server and received a query request
+      string remote_ip;
+      int remote_port;
+      char is_get_all, is_full_content;
+      int start_position;
+      string client_ip;
+      int client_port;
+      ParseQueryReqPacket(
+        req,
+        remote_ip,
+        remote_port,
+        is_get_all,
+        is_full_content,
+        start_position,
+        client_ip,
+        client_port
+      );
+      if (is_get_all == 'A') {
+        // get all article
+        int total_packets = storage_length - start_position;
+        // exclude the packets which has not been stored
+        for (int i = start_position + 1; i <= storage_length; i ++) {
+          if (article_storage[i].first == 0 && article_storage[i].second == "")
+            total_packets--;
+        }
+        // start to send packets to the requester server
+        for (int i = start_position + 1; i <= storage_length; i ++) {
+          if (article_storage[i].first == 0 && article_storage[i].second == ""){
+          } else {
+            string sent_article = article_storage[i].second;
+            if (is_full_content == 'A') {
+              sent_article = sent_article.substr(0, 50);
+            }
+            string QueryReply = FormQueryReplyPacket (
+              total_packets,
+              i,
+              article_storage[i].first,
+              client_ip,
+              client_port,
+              sent_article
+            );
+            // send this packet to the connected server
+            if (
+              UDP_send_packet_socket(
+                QueryReply.c_str(),
+                remote_ip.c_str(),
+                remote_port,
+                socket_fd
+              ) == -1) {
+              printf("Error: met error in sending Query Reply out");
+              continue;
+            }
+          }
+        }
+        printf(
+          "Total %d articles have been sent to <%s:%d>\n",
+          total_packets,
+          remote_ip.c_str(),
+          remote_port
+        );
+      } else {
+        // get a specific article
+        string sent_article = article_storage[start_position].second;
+        if (is_full_content == 'A') {
+          sent_article = sent_article.substr(0, 50);
+        }
+        string QueryReply = FormQueryReplyPacket (
+          1,
+          start_position,
+          article_storage[start_position].first,
+          client_ip,
+          client_port,
+          sent_article
+        );
+        // send this packet to the connected server
+        if (
+          UDP_send_packet_socket(
+            QueryReply.c_str(),
+            remote_ip.c_str(),
+            remote_port,
+            socket_fd
+          ) == -1) {
+          printf("Error: met error in sending Query Reply out");
+          continue;
+        }
+        printf(
+          "No.%d article has been sent to <%s:%d>\n",
+          start_position,
+          remote_ip.c_str(),
+          remote_port
+        );
+      }
     } else if (req[0] == 'B' && is_primary == true) {
       // received an update as a primary server
       int unique_id, reply_to_num;
@@ -225,6 +316,10 @@ void SequentialServer(string coor_addr,
         reply_to_num,
         article_content
       );
+      if (storage_length >= 10000 || unique_id >= 10000) {
+        printf("Storage is full...\n");
+        continue;
+      }
       storage_length = max(storage_length, unique_id);
       article_storage[unique_id] = make_pair(reply_to_num, article_content);
     } else {

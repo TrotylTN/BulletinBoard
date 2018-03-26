@@ -38,5 +38,8 @@ int main() {
   cout << i2 << ", " << i3 << endl;
   cout << article << endl;
 
+  pair <int, string> a;
+  cout << "!!!" << a.first << ',' << a.second <<endl;
+  cout << string("abc").substr(0,50) <<endl;
 
 }

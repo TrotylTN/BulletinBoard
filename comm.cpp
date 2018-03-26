@@ -485,7 +485,7 @@ void ParseQueryReqPacket(
 
 
 /*
- * QueryReq Sending Packet:
+ * Query Reply Sending Packet:
  * P[0]: A
  * P[1:5]: how many packets have been sent
  * P[5:9]: unique id for this packet
