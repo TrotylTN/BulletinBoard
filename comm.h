@@ -252,3 +252,11 @@ void ParseBroadcastPacket(
   int &reply_to_num,
   string &full_content
 );
+
+/*
+ * Primary Granting
+ * P[0]: 1
+ * P[1:16]: primary server
+ */
+string FormPrimaryAccessPacket(string ip_addr);
+void ParsePrimaryAccessPacket(string recv_packet, string &ip_addr);

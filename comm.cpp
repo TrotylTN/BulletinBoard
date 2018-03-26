@@ -573,7 +573,7 @@ void ParseQueryReplyPacket(
   // 37: max 4000
   request_type = recv_packet[37];
   full_content = recv_packet.substr(38);
-  
+
   return;
 }
 
@@ -618,4 +618,18 @@ void ParseBroadcastPacket(
   full_content = recv_packet.substr(9);
 
   return;
+}
+
+/*
+ * Primary Granting
+ * P[0]: 1
+ * P[1:16]: primary server
+ */
+string FormPrimaryAccessPacket(string ip_addr) {
+  string res = "1";
+  res += ip_addr;
+  return res;
+}
+void ParsePrimaryAccessPacket(string recv_packet, string &ip_addr) {
+  ip_addr = recv_packet.substr(1);
 }
