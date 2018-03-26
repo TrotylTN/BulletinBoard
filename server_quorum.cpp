@@ -202,150 +202,6 @@ void QuorumServer(string coor_addr,
 
       // pop the non-assigned article out
       to_be_assigned_articles.pop();
-    } else if (req[0] == 'A') {
-      // received a reply for a client's read/view request
-      int total_packets, unique_id, reply_to_num;
-      string client_ip;
-      int client_port, updated_length;
-      char request_type;
-      string full_content;
-      ParseQueryReplyPacket(
-        req,
-        total_packets,
-        unique_id,
-        reply_to_num,
-        client_ip,
-        client_port,
-        updated_length,
-        request_type,
-        full_content
-      );
-      if (request_type == 'V') {
-        // TODO
-        // this is a reply for View
-        string ViewReply = FormViewReplyPacket(
-          unique_id,
-          reply_to_num,
-          full_content
-        );
-        if (
-          UDP_send_packet_socket(
-            ViewReply.c_str(),
-            client_ip.c_str(),
-            client_port,
-            socket_fd
-          ) == -1) {
-          printf("Error: met error in sending View Reply out");
-          continue;
-        }
-        printf(
-          "No.%d sent to <%s:%d>\n",
-          unique_id,
-          client_ip.c_str(),
-          client_port
-        );
-      } else {
-        // this is replies for Read
-        if (total_packets == 0) {
-          // no need for update
-          string emptyReadReply = FormReadReplyPacket(
-            updated_length,
-            0,
-            0,
-            0,
-            ""
-          );
-          if (
-            UDP_send_packet_socket(
-              emptyReadReply.c_str(),
-              client_ip.c_str(),
-              client_port,
-              socket_fd
-            ) == -1) {
-            printf("Error: met error in sending Read Reply out");
-            continue;
-          }
-          printf(
-            "No need for update for client <%s:%d>, an empty reply sent\n",
-            client_ip.c_str(),
-            client_port
-          );
-          continue;
-        }
-        // forward the first packet to client
-        string aReadReply = FormReadReplyPacket(
-          updated_length,
-          unique_id,
-          reply_to_num,
-          total_packets,
-          full_content
-        );
-        if (
-          UDP_send_packet_socket(
-            aReadReply.c_str(),
-            client_ip.c_str(),
-            client_port,
-            socket_fd
-          ) == -1) {
-          printf("Error: met error in sending Read Reply out");
-          continue;
-        }
-        int rest_packets = total_packets - 1;
-        // continue to receive packets, and do forwarding
-        while (rest_packets > 0) {
-          if (
-            recvfrom(
-              socket_fd,
-              buf,
-              4096,
-              0,
-              (struct sockaddr *) &si_other,
-              &socketlen
-            ) < 0
-          ) {
-            continue;
-          }
-          string req = string(buf);
-          if (req[0] != 'A') {
-            printf("Error: Received unexpected message during forward\n");
-            return;
-          }
-          ParseQueryReplyPacket(
-            req,
-            total_packets,
-            unique_id,
-            reply_to_num,
-            client_ip,
-            client_port,
-            updated_length,
-            request_type,
-            full_content
-          );
-          string aReadReply = FormReadReplyPacket(
-            updated_length,
-            unique_id,
-            reply_to_num,
-            total_packets,
-            full_content
-          );
-          if (
-            UDP_send_packet_socket(
-              aReadReply.c_str(),
-              client_ip.c_str(),
-              client_port,
-              socket_fd
-            ) == -1) {
-            printf("Error: met error in sending Read Reply out");
-            continue;
-          }
-          rest_packets --;
-        }
-        printf(
-          "Forwarded all updated to <%s:%d>\n",
-          client_ip.c_str(),
-          client_port
-        );
-      }
     } else if (req[0] == 'Q') {
       // this is a coordinator server and received a query request
       string remote_ip;
@@ -387,8 +243,8 @@ void QuorumServer(string coor_addr,
           if (
             UDP_send_packet_socket(
               QueryReply.c_str(),
-              remote_ip.c_str(),
-              remote_port,
+              coor_addr.c_str(),
+              coor_port,
               socket_fd
             ) == -1) {
             printf("Error: met error in sending Query Reply out");
@@ -425,8 +281,8 @@ void QuorumServer(string coor_addr,
             if (
               UDP_send_packet_socket(
                 QueryReply.c_str(),
-                remote_ip.c_str(),
-                remote_port,
+                coor_addr.c_str(),
+                coor_port,
                 socket_fd
               ) == -1) {
               printf("Error: met error in sending Query Reply out");
@@ -437,8 +293,8 @@ void QuorumServer(string coor_addr,
         printf(
           "Total %d articles have been sent to <%s:%d>\n",
           total_packets,
-          remote_ip.c_str(),
-          remote_port
+          coor_addr.c_str(),
+          coor_port
         );
       } else {
         // get a specific article
@@ -460,8 +316,8 @@ void QuorumServer(string coor_addr,
         if (
           UDP_send_packet_socket(
             QueryReply.c_str(),
-            remote_ip.c_str(),
-            remote_port,
+            coor_addr.c_str(),
+            coor_port,
             socket_fd
           ) == -1) {
           printf("Error: met error in sending Query Reply out");
@@ -470,8 +326,8 @@ void QuorumServer(string coor_addr,
         printf(
           "No.%d article has been sent to <%s:%d>\n",
           start_position,
-          remote_ip.c_str(),
-          remote_port
+          coor_addr.c_str(),
+          coor_port
         );
       }
     } else if (req[0] == 'B') {
