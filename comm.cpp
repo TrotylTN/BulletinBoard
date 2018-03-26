@@ -409,13 +409,26 @@ void ParseNumReplyPacket(string recv_packet, int &assigned_num) {
   return;
 }
 
+/*
+ * QueryReq Sending Packet:
+ * P[0]: Q
+ * P[1:16]: local ip addr
+ * P[16:21]: local port
+ * P[21]: 'A' for getting all articles, 'S' for getting a specific article
+ * P[22]: 'A' for abstract (first 50 char), 'F' for full content (4000 max char)
+ * P[22:26]: if getting all, where to start, if a specific, which one
+ * P[26:41]: client id addr
+ * P[41:46]: client port number
+ */
 string FormQueryReqPacket(
   string local_addr,
   int local_port,
-  char all_or_specific;
+  char all_or_specific,
   char abstract_or_full_content,
-  int from_which_article
-} {
+  int from_which_article,
+  string client_ip_addr,
+  int client_port
+) {
 
 }
 
@@ -425,15 +438,30 @@ void ParseQueryReqPacket(
   int &remote_port,
   char &all_or_specific,
   char &abstract_or_full_content,
-  int &from_which_article
+  int &from_which_article,
+  string &client_ip_addr,
+  int &client_port
 ) {
 
 }
 
+
+/*
+ * QueryReq Sending Packet:
+ * P[0]: A
+ * P[1:5]: how many packets have been sent
+ * P[5:9]: unique id for this packet
+ * P[9:13]: this article's reply to number, if new article, here should be 0
+ * P[13:28]: client ip addr
+ * P[28:33]: client port number
+ * P[33:]: Article content
+ */
 string FormQueryReplyPacket(
   int total_packet_sent,
   int unique_id_this_article,
   int reply_to_num,
+  string client_ip_addr,
+  int client_port,
   string full_content
 ) {
 
@@ -444,7 +472,9 @@ void ParseQueryReplyPacket(
   int &total_packet_sent,
   int &unique_id_this_article,
   int &reply_to_num,
+  string &client_ip_addr,
+  int &client_port,
   string &full_content
 ) {
-  
+
 }

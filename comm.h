@@ -38,10 +38,27 @@ string remove_all_end_spaces(string s);
 // print all caches out
 void PrintAllCaches(int n, pair<int, string> list_cache[10000]);
 
+/*
+ * Ping Sending Packet:
+ * P[0]: C
+ * P[1]: 'R' stands for this is a request, 'A' stands for this is an ACK
+ * P[2:17]: Source IP
+ * P[17:22]: Source port
+ * we assume all incoming args are valid
+ */
 string FormPingPacket(string local_addr, int local_port, char msgstatus);
 void ParsePingReqPacket(string rev_packet, string &remote_ip, int &remote_port);
 bool ParsePingACKPacket(string rev_packet);
 
+/*
+ * Post Sending Packet:
+ * P[0]: P
+ * P[1:16]: Source IP
+ * P[16:21]: Source port
+ * P[21:25]: Reply-to number, if zero, means this is a new article\
+ * P[25:]: article content
+ * we assume all incoming args are valid
+ */
 string FormPostPacket(string local_addr,
                       int local_port,
                       int reply_to_num,
@@ -52,6 +69,14 @@ void ParsePostReqPacket(string rev_packet,
                         int &reply_to_num,
                         string &article_content);
 
+/*
+ * ReadReq Sending Packet:
+ * P[0]: R
+ * P[1:16]: Source IP
+ * P[16:21]: Source port
+ * P[21:25]: Cache limit
+ * we assume all incoming args are valid
+ */
 string FormReadReqPacket(string local_addr, int local_port, int cache_length);
 void ParseReadReqPacket(
   string rev_packet,
@@ -60,6 +85,15 @@ void ParseReadReqPacket(
   int &cache_length
 );
 
+/*
+ * readReply Sending Packet:
+ * P[0]: L
+ * P[1:5]: the updated list length (max 9999)
+ * P[5:9]: the number for the current article
+ * P[9:13]: the number this reply replies to (if article here will be 0)
+ * P[13:63]: first 50 characters abstract for this reply or article
+ * we assume all incoming args are valid
+ */
 string FormReadReplyPacket(
   int new_list_length,
   int cur_num,
@@ -74,6 +108,14 @@ void ParseReadReplyPacket(
   string &first_50_abstract
 );
 
+/*
+ * ViewReq Sending Packet:
+ * P[0]: V
+ * P[1:16]: Source IP
+ * P[16:21]: Source port
+ * P[21:25]: Cache limit
+ * we assume all incoming args are valid
+ */
 string FormViewReqPacket(string local_addr, int local_port, int article_num);
 void ParseViewReqPacket(
   string rev_packet,
@@ -82,6 +124,14 @@ void ParseViewReqPacket(
   int &article_num
 );
 
+/*
+ * ViewReply Sending Packet:
+ * P[0]: F
+ * P[1:5]: the number for the current article
+ * P[5:9]: the number this reply replies to (if article here will be 0)
+ * P[9:]: the full content for the article/reply
+ * we assume all incoming args are valid
+ */
 string FormViewReplyPacket(
   int cur_num,
   int reply_to_num,
@@ -94,6 +144,12 @@ void ParseViewReplyPacket(
   string &full_content
 );
 
+/*
+ * NumReq Sending Packet:
+ * P[0]: N
+ * P[1:16]: Source IP
+ * P[16:21]: Source port
+ */
 string FormNumReqPacket(string local_addr, int local_port);
 void ParseNumReqPacket(
   string recv_packet,
@@ -101,29 +157,40 @@ void ParseNumReqPacket(
   int &remote_port
 );
 
+/*
+ * NumReq Sending Packet:
+ * P[0]: 0
+ * P[1:5]: Assigned number for the new article
+ */
 string FormNumReplyPacket(int assigned_num);
 void ParseNumReplyPacket(string recv_packet, int &assigned_num);
 
 string FormQueryReqPacket(
   string local_addr,
   int local_port,
-  char all_or_specific;
+  char all_or_specific,
   char abstract_or_full_content,
-  int from_which_article
-};
+  int from_which_article,
+  string client_ip_addr,
+  int client_port
+);
 void ParseQueryReqPacket(
   string recv_packet,
   string &remote_ip,
   int &remote_port,
   char &all_or_specific,
   char &abstract_or_full_content,
-  int &from_which_article
+  int &from_which_article,
+  string &client_ip_addr,
+  int &client_port
 );
 
 string FormQueryReplyPacket(
   int total_packet_sent,
   int unique_id_this_article,
   int reply_to_num,
+  string client_ip_addr,
+  int client_port,
   string full_content
 );
 void ParseQueryReplyPacket(
@@ -131,5 +198,7 @@ void ParseQueryReplyPacket(
   int &total_packet_sent,
   int &unique_id_this_article,
   int &reply_to_num,
+  string &client_ip_addr,
+  int &client_port,
   string &full_content
 );
