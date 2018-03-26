@@ -554,9 +554,7 @@ string FormQueryReplyPacket(
   res += full_content;
   res += string(4038 - res.length(), ' ');
   // max 4037 < 4096
-
-  cerr << res << endl;
-
+  
   return res;
 }
 
