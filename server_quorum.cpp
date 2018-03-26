@@ -392,6 +392,8 @@ void QuorumServerCoor(string self_addr,
 
     string req = string(buf);
 
+    cerr << req << endl;
+
     if (req[0] == 'S') {
       // receive registration request from remote server
       string remote_ip;
