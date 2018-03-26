@@ -286,7 +286,121 @@ void SequentialServer(string coor_addr,
       to_be_assigned_articles.pop();
     } else if (req[0] == 'A') {
       // received a reply for a client's read/view request
+      int total_packets, unique_id, reply_to_num;
+      string client_ip;
+      int client_port, updated_length;
+      char request_type;
+      string full_content;
+      ParseQueryReplyPacket(
+        req,
+        total_packets,
+        unique_id,
+        reply_to_num,
+        client_ip,
+        client_port,
+        updated_length,
+        request_type,
+        full_content
+      );
+      if (request_type == 'V') {
+        // TODO
+        // this is a reply for View
+      } else {
+        // this is replies for Read
+        if (total_packets == 0) {
+          // no need for update
+          string emptyReadReply = FormReadReplyPacket(
+            updated_length,
+            0,
+            0,
+            0,
+            ""
+          );
+          if (
+            UDP_send_packet_socket(
+              emptyReadReply.c_str(),
+              client_ip.c_str(),
+              client_port,
+              socket_fd
+            ) == -1) {
+            printf("Error: met error in sending Read Reply out");
+            continue;
+          }
+          printf(
+            "No need for update for client <%s:%d>, an empty reply sent\n",
+            client_ip.c_str(),
+            client_port
+          );
+          continue;
+        }
 
+        string aReadReply = FormReadReplyPacket(
+          updated_length,
+          unique_id,
+          reply_to_num,
+          total_packets,
+          full_content
+        );
+        if (
+          UDP_send_packet_socket(
+            aReadReply.c_str(),
+            client_ip.c_str(),
+            client_port,
+            socket_fd
+          ) == -1) {
+          printf("Error: met error in sending Read Reply out");
+          continue;
+        }
+        int rest_packets = total_packets - 1;
+        while (rest_packets > 0) {
+          if (
+            recvfrom(
+              socket_fd,
+              buf,
+              4096,
+              0,
+              (struct sockaddr *) &si_other,
+              &socketlen
+            ) < 0
+          ) {
+            continue;
+          }
+          string req = string(buf);
+          if (req[0] != 'A') {
+            printf("Error: Received unexpected message during forward\n");
+            return;
+          }
+          ParseQueryReplyPacket(
+            req,
+            total_packets,
+            unique_id,
+            reply_to_num,
+            client_ip,
+            client_port,
+            updated_length,
+            request_type,
+            full_content
+          );
+          string aReadReply = FormReadReplyPacket(
+            updated_length,
+            unique_id,
+            reply_to_num,
+            total_packets,
+            full_content
+          );
+          if (
+            UDP_send_packet_socket(
+              aReadReply.c_str(),
+              client_ip.c_str(),
+              client_port,
+              socket_fd
+            ) == -1) {
+            printf("Error: met error in sending Read Reply out");
+            continue;
+          }
+          rest_packets --;
+        }
+      }
     } else if (req[0] == 'Q' && is_primary == true) {
       // this is a primary server and received a query request
       string remote_ip;
@@ -312,6 +426,32 @@ void SequentialServer(string coor_addr,
         for (int i = start_position + 1; i <= storage_length; i ++) {
           if (article_storage[i].first == 0 && article_storage[i].second == "")
             total_packets--;
+        }
+        if (total_packets <= 0) {
+          // no need for update
+          string QueryReply = FormQueryReplyPacket (
+            0,
+            0,
+            0,
+            client_ip,
+            client_port,
+            storage_length,
+            'R',      // this is a read-all request
+            ""
+          );
+          if (
+            UDP_send_packet_socket(
+              QueryReply.c_str(),
+              remote_ip.c_str(),
+              remote_port,
+              socket_fd
+            ) == -1) {
+            printf("Error: met error in sending Query Reply out");
+            continue;
+          }
+          printf("no need for update, an empty packet sent\n");
+          // directly enter next iteration
+          continue;
         }
         // start to send packets to the requester server
         for (int i = start_position + 1; i <= storage_length; i ++) {
