@@ -530,6 +530,7 @@ void QuorumServerCoor(string self_addr,
         }
 
         string singlereply = string(buf);
+        cerr << singlereply << endl;
 
         if (singlereply[0] == 'A') {
           // received a reply for a client's read/view request
@@ -633,6 +634,7 @@ void QuorumServerCoor(string self_addr,
       } else {
         // send all articles to the requester
         int total_packets = storage_length;
+        cerr << "store length"
         for (int i = 1; i <= storage_length; i++) {
           if (article_storage[i].first == 0 && article_storage[i].second == ""){
             total_packets --;
