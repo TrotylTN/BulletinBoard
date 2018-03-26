@@ -42,6 +42,7 @@ void SequentialServer(string coor_addr,
     if (req[0] == '1') {
       // became primary backup server;
       is_primary = true;
+      printf("This server became Primary Backup Server\n");
     } else if (req[0] == 'C') {
       // ping request
       string remote_ip;
@@ -119,7 +120,7 @@ void SequentialServer(string coor_addr,
             0,
             0,
             0,
-            "No Update"
+            ""
           );
           if (
             UDP_send_packet_socket(
@@ -227,6 +228,7 @@ void SequentialServer(string coor_addr,
           continue;
         }
         printf("View Reply sent to <%s:%d>\n", client_ip.c_str(), client_port);
+        continue;
       } else {
         // queue the client into to_be_replied
         to_be_replied_view.push_back(make_pair(client_ip, client_port));
@@ -272,6 +274,7 @@ void SequentialServer(string coor_addr,
         storage_length = max(storage_length, assigned_num);
         article_storage[assigned_num] = make_pair(reply_to_num,article_content);
         printf("Stored No.%d\n", assigned_num);
+        to_be_assigned_articles.pop();
         // directly enter next loop
         continue;
       }
@@ -490,7 +493,11 @@ void SequentialServer(string coor_addr,
             printf("Error: met error in sending Query Reply out");
             continue;
           }
-          printf("no need for update, an empty packet sent\n");
+          printf(
+            "<%s:%d> no need for update, an empty packet sent\n",
+            client_ip.c_str(),
+            client_port
+          );
           // directly enter next iteration
           continue;
         }
@@ -582,7 +589,7 @@ void SequentialServer(string coor_addr,
       }
       storage_length = max(storage_length, unique_id);
       article_storage[unique_id] = make_pair(reply_to_num, article_content);
-      printf("Stored No.%d\n", unique_id);
+      printf("Stored No.%d: %s\n", unique_id, article_content.c_str());
     } else {
       printf("Received unauthorized request symbol \"%c\"\n", req[0]);
     }
@@ -595,8 +602,9 @@ void SequentialServerCoor(string self_addr,
                           int self_port,
                           int socket_fd) {
   // stored important information
-  int coor_mode_number = 1;
-  int total_article;
+  char coor_mode_number = '1';
+  // init total_article
+  int total_article = 0;
   string primary_ip = "";
   int primary_port = -1;
   vector< pair<string,int> > server_list;
@@ -635,7 +643,7 @@ void SequentialServerCoor(string self_addr,
       );
       // insert this server into the server list
       server_list.push_back(make_pair(remote_ip, remote_port));
-
+      printf("<%s:%d> connected\n", remote_ip.c_str(), remote_port);
       string ReplyMessage = FormServerRegPacket(
         remote_ip,
         remote_port,
@@ -670,14 +678,72 @@ void SequentialServerCoor(string self_addr,
         }
         primary_ip = remote_ip;
         primary_port = remote_port;
+        printf(
+          "<%s:%d> became primary server\n",
+          remote_ip.c_str(),
+          remote_port
+        );
       }
     } else if (req[0] == 'N') {
       // receive unique id request
+      if (total_article < 9999) {
+        string remote_ip;
+        int remote_port;
+        ParseNumReqPacket(
+          req,
+          remote_ip,
+          remote_port
+        );
 
+        total_article ++;
+
+        string NumReply = FormNumReplyPacket(total_article);
+        if (
+          UDP_send_packet_socket(
+            NumReply.c_str(),
+            remote_ip.c_str(),
+            remote_port,
+            socket_fd
+          ) == -1) {
+          printf("Error: met error in sending NumReply out");
+          continue;
+        }
+        printf(
+          "Grant ID %d to <%s:%d>\n",
+          total_article,
+          remote_ip.c_str(),
+          remote_port
+        );
+      } else {
+        // ignore this request, let server cannot process it
+        printf("Error: articles number is over the limit 9999\n");
+      }
     } else if (req[0] == 'B') {
       // forward Broadcast request to primary server
+
+      // forward it to primary back up server
+      if (
+        UDP_send_packet_socket(
+          req.c_str(),
+          primary_ip.c_str(),
+          primary_port,
+          socket_fd
+        ) == -1) {
+        printf("Error: met error in sending NumReply out");
+        continue;
+      }
     } else if (req[0] == 'Q') {
       // forward Query request to primary server
+      if (
+        UDP_send_packet_socket(
+          req.c_str(),
+          primary_ip.c_str(),
+          primary_port,
+          socket_fd
+        ) == -1) {
+        printf("Error: met error in sending NumReply out");
+        continue;
+      }
     } else {
       printf("Received unauthorized request symbol \"%c\"\n", req[0]);
     }

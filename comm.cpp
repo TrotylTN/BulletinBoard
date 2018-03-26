@@ -69,7 +69,7 @@ void PrintAllCaches(int n, pair<int, string> list_cache[10000]) {
       // ignore
     } else {
       printf(
-        "%4d.%4d:%s",
+        "%4d.%4d:%s\n",
         i,
         list_cache[i].first,
         list_cache[i].second.c_str()
@@ -100,7 +100,6 @@ string FormPingPacket(string local_addr, int local_port, char msgstatus) {
   cur_len = res.length();
   res += string(22 - cur_len, ' ');
 
-  // cerr << res << endl;
   return res;
 }
 
@@ -151,6 +150,7 @@ string FormPostPacket(string local_addr,
   res += string(25 - cur_len, ' ');
   // so far length should be 25
   res += article_content;
+
   return res;
 }
 
@@ -262,6 +262,7 @@ string FormReadReplyPacket(
   // should be 17
 
   res += first_50_abstract;
+  res += string(67 - res.length(), ' ');
 
   return res;
 }
@@ -286,7 +287,7 @@ void ParseReadReplyPacket(
   string total_packets_str = remove_all_end_spaces(recv_packet.substr(13, 4));
   total_packets = stoi(total_packets_str, nullptr);
 
-  first_50_abstract = recv_packet.substr(17);
+  first_50_abstract = remove_all_end_spaces(recv_packet.substr(17, 50));
 
   return;
 }
@@ -342,7 +343,7 @@ void ParseViewReqPacket(
  * P[0]: F
  * P[1:5]: the number for the current article
  * P[5:9]: the number this reply replies to (if article here will be 0)
- * P[9:]: the full content for the article/reply
+ * P[9:4009]: the full content for the article/reply
  * we assume all incoming args are valid
  */
 string FormViewReplyPacket(
@@ -361,6 +362,7 @@ string FormViewReplyPacket(
   // should be 9
 
   res += full_content;
+  res += string(4009 - res.length(), ' ');
 
   return res;
 }
@@ -377,7 +379,7 @@ void ParseViewReplyPacket(
   string reply_to_num_str = remove_all_end_spaces(recv_packet.substr(5, 4));
   reply_to_num = stoi(reply_to_num_str, nullptr);
 
-  full_content = recv_packet.substr(9);
+  full_content = remove_all_end_spaces(recv_packet.substr(9, 4000));
 
   return;
 }
@@ -516,7 +518,7 @@ void ParseQueryReqPacket(
  * P[28:33]: client port number
  * P[33,37]: updated length of storage
  * P[37]: this request type, 'V' stands for View, 'R' stands for Read
- * P[38:]: Article content
+ * P[38:4038]: Article content
  */
 string FormQueryReplyPacket(
   int total_packet_sent,
@@ -550,7 +552,11 @@ string FormQueryReplyPacket(
 
   res.push_back(request_type);
   res += full_content;
+  res += string(4038 - res.length(), ' ');
   // max 4037 < 4096
+
+  cerr << res << endl;
+
   return res;
 }
 
@@ -567,7 +573,7 @@ void ParseQueryReplyPacket(
 ) {
   // 1-5
   string total_packet_str = remove_all_end_spaces(recv_packet.substr(1, 4));
-  total_packet_str = stoi(total_packet_str, nullptr);
+  total_packet_sent = stoi(total_packet_str, nullptr);
   // 5-9
   string unique_id_str = remove_all_end_spaces(recv_packet.substr(5, 4));
   unique_id_this_article = stoi(unique_id_str, nullptr);
@@ -584,7 +590,7 @@ void ParseQueryReplyPacket(
   updated_length = stoi(length_str, nullptr);
   // 37: max 4000
   request_type = recv_packet[37];
-  full_content = recv_packet.substr(38);
+  full_content = remove_all_end_spaces(recv_packet.substr(38, 4000));
 
   return;
 }
@@ -594,7 +600,7 @@ void ParseQueryReplyPacket(
  * P[0]: B
  * P[1:5]: article number
  * P[5:9]: reply_to_num
- * P[9:]: full content
+ * P[9:4009]: full content
  */
 string FormBroadcastPacket(
   int unique_id,
@@ -610,6 +616,7 @@ string FormBroadcastPacket(
   res += string(9 - res.length(),' ');
   // should be 9
   res += full_content;
+  res += string(4009 - res.length(), ' ');
 
   return res;
 }
@@ -627,7 +634,7 @@ void ParseBroadcastPacket(
   string reply_to_num_str = remove_all_end_spaces(recv_packet.substr(5, 4));
   reply_to_num = stoi(reply_to_num_str, nullptr);
   // 9:
-  full_content = recv_packet.substr(9);
+  full_content = remove_all_end_spaces(recv_packet.substr(9, 4000));
 
   return;
 }
@@ -663,7 +670,7 @@ void ParsePrimaryAccessPacket(string recv_packet,string &ip_addr,int &port_num){
  * P[21]: mode number
  */
 string FormServerRegPacket(string ip_addr, int port_num, char mode_num) {
-  string res;
+  string res = "S";
   res += ip_addr;
   res += string(16 - res.length(), ' ');
   // should be 16

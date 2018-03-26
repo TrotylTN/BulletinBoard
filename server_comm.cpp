@@ -49,6 +49,7 @@ int RegisterThisServer(string coor_addr,
     self_port,
     mode_num
   );
+  printf("Mode Number %c\n", mode_num);
   if (mode_num >= '1' && mode_num <= '3') {
     return (mode_num - '0');
   }

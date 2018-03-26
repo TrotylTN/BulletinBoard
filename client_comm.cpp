@@ -61,7 +61,12 @@ void BulletClient(string server_ip_addr,
       string article_content;
       printf("Please enter your new article's content (not longer than 4000");
       printf(" characters and end with Enter): ");
-      cin >> article_content;
+      cin.ignore(2, '\n');
+      getline(cin, article_content);
+      if (article_content.length() == 0) {
+        printf("Error: empty article\n");
+        continue;
+      }
       if (article_content.length() > 4000) {
         printf("Error: article too long\n");
         continue;
@@ -285,11 +290,20 @@ void BulletClient(string server_ip_addr,
       printf("(Range from 1 to %d): ", cache_length);
       int reply_to_num;
       cin >> reply_to_num;
+      if (reply_to_num > cache_length || reply_to_num <= 0) {
+        printf("invalid reply to number\n");
+        continue;
+      }
+      cin.ignore(2, '\n');
 
       string article_content;
       printf("Please enter your new reply's content for No.%d", reply_to_num);
       printf("(not longer than 4000 characters and end with Enter): ");
-      cin >> article_content;
+      getline(cin, article_content);
+      if (article_content.length() == 0) {
+        printf("Error: empty article\n");
+        continue;
+      }
       if (article_content.length() > 4000) {
         printf("Error: reply too long\n");
         continue;
