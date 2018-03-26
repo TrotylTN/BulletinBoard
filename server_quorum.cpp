@@ -629,14 +629,36 @@ void QuorumServerCoor(string self_addr,
         // send all articles to the requester
         int total_packets = storage_length;
         for (int i = 1; i <= storage_length; i++) {
-          if (article_storage[i].fisrt == 0 && article_storage[i].second == ""){
+          if (article_storage[i].first == 0 && article_storage[i].second == ""){
             total_packets --;
           }
         }
         // send all articles to the client
         for (int i = 1; i <= storage_length; i++) {
-          if (article_storage[i].fisrt == 0 && article_storage[i].second == ""){
-            // 
+          if (article_storage[i].first == 0 && article_storage[i].second == ""){
+            string readReply = FormReadReplyPacket(
+              storage_length,
+              i,
+              article_storage[i].first,
+              total_packets,
+              article_storage[i].second
+            );
+            if (
+              UDP_send_packet_socket(
+                readReply.c_str(),
+                requester_ip.c_str(),
+                requester_port,
+                socket_fd
+              ) == -1) {
+              printf("Error: met error in sending Read Reply out\n");
+              continue;
+            }
+            printf(
+              "%d abstracts sent to <%s:%d>\n",
+              total_packets,
+              requester_ip.c_str(),
+              requester_port
+            );
           }
         }
 

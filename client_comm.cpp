@@ -50,7 +50,7 @@ void BulletClient(string server_ip_addr,
          server_ip_addr.c_str(),
          server_port_num);
   while (true) {
-    printf("\nPlease choose the opeartion you want:\n");
+    printf("\nPlease choose the operation you want:\n");
     printf("  1.Post an article\n  2.Read the list for all articles & replies");
     printf("\n  3.Choose an article/reply to view full content\n");
     printf("  4.Reply to an article or a reply\n");
