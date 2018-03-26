@@ -643,6 +643,8 @@ void QuorumServerCoor(string self_addr,
         // send all articles to the client
         for (int i = 1; i <= storage_length; i++) {
           if (article_storage[i].first == 0 && article_storage[i].second == ""){
+            // ignore
+          } else {
             string readReply = FormReadReplyPacket(
               storage_length,
               i,
