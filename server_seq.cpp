@@ -305,6 +305,27 @@ void SequentialServer(string coor_addr,
       if (request_type == 'V') {
         // TODO
         // this is a reply for View
+        string ViewReply = FormViewReplyPacket(
+          unique_id,
+          reply_to_num,
+          full_content
+        );
+        if (
+          UDP_send_packet_socket(
+            ViewReply.c_str(),
+            client_ip.c_str(),
+            client_port,
+            socket_fd
+          ) == -1) {
+          printf("Error: met error in sending View Reply out");
+          continue;
+        }
+        printf(
+          "No.%d sent to <%s:%d>\n",
+          unique_id,
+          client_ip.c_str(),
+          client_port
+        );
       } else {
         // this is replies for Read
         if (total_packets == 0) {
@@ -333,7 +354,7 @@ void SequentialServer(string coor_addr,
           );
           continue;
         }
-
+        // forward the first packet to client
         string aReadReply = FormReadReplyPacket(
           updated_length,
           unique_id,
@@ -352,6 +373,7 @@ void SequentialServer(string coor_addr,
           continue;
         }
         int rest_packets = total_packets - 1;
+        // continue to receive packets, and do forwarding
         while (rest_packets > 0) {
           if (
             recvfrom(
@@ -400,6 +422,11 @@ void SequentialServer(string coor_addr,
           }
           rest_packets --;
         }
+        printf(
+          "Forwarded all updated to <%s:%d>\n",
+          client_ip.c_str(),
+          client_port
+        );
       }
     } else if (req[0] == 'Q' && is_primary == true) {
       // this is a primary server and received a query request
