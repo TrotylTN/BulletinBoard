@@ -11,7 +11,6 @@ void QuorumServer(string coor_addr,
   vector<pair<string, int> > to_be_replied_read;
   vector<pair<string, int> > to_be_replied_view;
 
-  // these two var are just for primary backup server's usage
   // first: reply to #, second: content
   pair<int, string> article_storage[10000];
   int storage_length = 0;
@@ -128,7 +127,7 @@ void QuorumServer(string coor_addr,
           continue;
         }
         printf(
-          "Read request for <%s:%d> from No.%d sent to primary backup server\n",
+          "Read request for <%s:%d> from No.%d sent to coordinator server\n",
           client_ip.c_str(),
           client_port,
           client_cache_length
@@ -168,7 +167,7 @@ void QuorumServer(string coor_addr,
           continue;
         }
         printf(
-          "View request for <%s:%d> for No.%d sent to primary backup server\n",
+          "View request for <%s:%d> for No.%d sent to coordinator backup server\n",
           client_ip.c_str(),
           client_port,
           article_num
@@ -197,7 +196,7 @@ void QuorumServer(string coor_addr,
         continue;
       }
       printf(
-        "Update for No.%d sent to primary backup server\n",
+        "Update for No.%d sent to coordinator backup server\n",
         assigned_num
       );
 
@@ -348,7 +347,7 @@ void QuorumServer(string coor_addr,
         );
       }
     } else if (req[0] == 'Q') {
-      // this is a primary server and received a query request
+      // this is a coordinator server and received a query request
       string remote_ip;
       int remote_port;
       char is_get_all, is_full_content;
@@ -476,7 +475,7 @@ void QuorumServer(string coor_addr,
         );
       }
     } else if (req[0] == 'B') {
-      // received an update as a primary server
+      // received an update as writer server
       int unique_id, reply_to_num;
       string article_content;
       ParseBroadcastPacket(
