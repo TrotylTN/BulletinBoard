@@ -136,23 +136,24 @@ void BulletClient(string server_ip_addr,
       }
 
       string readReply = string(buf);
-      int new_length, cur_num, reply_to_num;
+      int new_length, cur_num, reply_to_num, total_packets;
       string first_50_abstract;
       ParseReadReplyPacket(
         readReply,
         new_length,
         cur_num,
         reply_to_num,
+        total_packets,
         first_50_abstract
       );
-      if (cur_num == 0 || cache_length - new_length == 0) {
+      if (cur_num == 0 || total_packets == 0) {
         // no need to update, continue directly
         printf("Local cache is already updated, no need to update again\n");
       } else {
         // TODO: start a loop to receive
         printf("Received %d new articles/replies, updating...\n", new_length);
         list_cache[cur_num] = make_pair(reply_to_num, first_50_abstract);
-        int rest_updates = cache_length - new_length - 1;
+        int rest_updates = total_packets - 1;
         // update the new length for cache
         cache_length = new_length;
 
@@ -177,6 +178,7 @@ void BulletClient(string server_ip_addr,
             new_length,
             cur_num,
             reply_to_num,
+            total_packets,
             first_50_abstract
           );
           // update the cache

@@ -107,7 +107,66 @@ void SequentialServer(string coor_addr,
       );
       // send the request to the primary backup server
       if (is_primary == true) {
-        // TODO: use local storage to reply
+        int start_position = client_cache_length;
+
+        int total_packets = storage_length - start_position;
+        if (total_packets <= 0) {
+          // TODO: send an empty packet to the client
+          string ReadReply = FormReadReplyPacket(
+            storage_length,
+            0,
+            0,
+            0,
+            "No Update"
+          );
+          if (
+            UDP_send_packet_socket(
+              ReadReply.c_str(),
+              client_ip.c_str(),
+              client_port,
+              socket_fd
+            ) == -1) {
+            printf("Error: met error in sending Read reply out");
+            continue;
+          }
+          // directly start next round of loop
+          continue;
+        }
+        // exclude the packets which has not been stored
+        for (int i = start_position + 1; i <= storage_length; i ++) {
+          if (article_storage[i].first == 0 && article_storage[i].second == "")
+            total_packets--;
+        }
+
+        for (int i = start_position + 1; i <= storage_length; i++) {
+          if (article_storage[i].first == 0 && article_storage[i].second == ""){
+            // ignore empty storage
+          } else {
+            // create the read reply packet
+            string ReadReply = FormReadReplyPacket(
+              storage_length,
+              i,
+              article_storage[i].first,
+              total_packets,
+              article_storage[i].second.substr(0,50)
+            );
+            if (
+              UDP_send_packet_socket(
+                ReadReply.c_str(),
+                client_ip.c_str(),
+                client_port,
+                socket_fd
+              ) == -1) {
+              printf("Error: met error in sending Read reply out");
+              continue;
+            }
+          }
+        }
+        printf(
+          "Articles list sent for <%s:%d>\n",
+          client_ip.c_str(),
+          client_port
+        );
 
       } else {
         // queue the client into to_be_replied
@@ -243,6 +302,7 @@ void SequentialServer(string coor_addr,
         // start to send packets to the requester server
         for (int i = start_position + 1; i <= storage_length; i ++) {
           if (article_storage[i].first == 0 && article_storage[i].second == ""){
+            // ignore the uncached one
           } else {
             string sent_article = article_storage[i].second;
             if (is_full_content == 'A') {

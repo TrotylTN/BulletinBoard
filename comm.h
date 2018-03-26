@@ -91,13 +91,15 @@ void ParseReadReqPacket(
  * P[1:5]: the updated list length (max 9999)
  * P[5:9]: the number for the current article
  * P[9:13]: the number this reply replies to (if article here will be 0)
- * P[13:63]: first 50 characters abstract for this reply or article
+ * P[13:17]: total packets number
+ * P[17:63]: first 50 characters abstract for this reply or article
  * we assume all incoming args are valid
  */
 string FormReadReplyPacket(
   int new_list_length,
   int cur_num,
   int reply_to_num,
+  int total_packets,
   string first_50_abstract
 );
 void ParseReadReplyPacket(
@@ -105,6 +107,7 @@ void ParseReadReplyPacket(
   int &new_list_length,
   int &cur_num,
   int &reply_to_num,
+  int &total_packets,
   string &first_50_abstract
 );
 

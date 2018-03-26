@@ -220,13 +220,15 @@ void ParseReadReqPacket(
  * P[1:5]: the updated list length (max 9999)
  * P[5:9]: the number for the current article
  * P[9:13]: the number this reply replies to (if article here will be 0)
- * P[13:63]: first 50 characters abstract for this reply or article
+ * P[13:17]: total packets number
+ * P[17:63]: first 50 characters abstract for this reply or article
  * we assume all incoming args are valid
  */
 string FormReadReplyPacket(
   int new_list_length,
   int cur_num,
   int reply_to_num,
+  int total_packets,
   string first_50_abstract
 ) {
   string res = "L";
@@ -243,6 +245,10 @@ string FormReadReplyPacket(
   res += string(13 - res.length(), ' ');
   // should be 13
 
+  res += to_string(total_packets);
+  res += string(17 - res.length(), ' ');
+  // should be 17
+
   res += first_50_abstract;
 
   return res;
@@ -253,6 +259,7 @@ void ParseReadReplyPacket(
   int &new_list_length,
   int &cur_num,
   int &reply_to_num,
+  int &total_packets,
   string &first_50_abstract
 ) {
   string new_length_str = remove_all_end_spaces(recv_packet.substr(1, 4));
@@ -264,7 +271,10 @@ void ParseReadReplyPacket(
   string reply_to_num_str = remove_all_end_spaces(recv_packet.substr(9, 4));
   reply_to_num = stoi(reply_to_num_str, nullptr);
 
-  first_50_abstract = recv_packet.substr(13);
+  string total_packets_str = remove_all_end_spaces(recv_packet.substr(13, 4));
+  total_packets = stoi(total_packets_str, nullptr);
+
+  first_50_abstract = recv_packet.substr(17);
 
   return;
 }
