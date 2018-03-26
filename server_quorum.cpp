@@ -490,13 +490,15 @@ void QuorumServerCoor(string self_addr,
 
       char request_type;
 
+      string QueryReq = req;
+
       printf("Read request will be randomly sent to %d servers\n", Nr);
       random_shuffle(server_list.begin(), server_list.end());
       for (int i = 0; i < Nr; i++) {
         if (
 
           UDP_send_packet_socket(
-            req.c_str(),
+            QueryReq.c_str(),
             server_list[i].first.c_str(),
             server_list[i].second,
             socket_fd
@@ -522,16 +524,16 @@ void QuorumServerCoor(string self_addr,
           continue;
         }
 
-        string req = string(buf);
+        string singlereply = string(buf);
 
-        if (req[0] == 'A') {
+        if (singlereply[0] == 'A') {
           // received a reply for a client's read/view request
           int total_packets, unique_id, reply_to_num;
           string client_ip;
           int client_port, updated_length;
           string full_content;
           ParseQueryReplyPacket(
-            req,
+            singlereply,
             total_packets,
             unique_id,
             reply_to_num,
@@ -574,13 +576,13 @@ void QuorumServerCoor(string self_addr,
               ) {
                 continue;
               }
-              string req = string(buf);
-              if (req[0] != 'A') {
+              string singlereply = string(buf);
+              if (singlereply[0] != 'A') {
                 printf("Error: Received unexpected message during forward\n");
                 return;
               }
               ParseQueryReplyPacket(
-                req,
+                singlereply,
                 total_packets,
                 unique_id,
                 reply_to_num,
@@ -625,6 +627,19 @@ void QuorumServerCoor(string self_addr,
         );
       } else {
         // send all articles to the requester
+        int total_packets = storage_length;
+        for (int i = 1; i <= storage_length; i++) {
+          if (article_storage[i].fisrt == 0 && article_storage[i].second == ""){
+            total_packets --;
+          }
+        }
+        // send all articles to the client
+        for (int i = 1; i <= storage_length; i++) {
+          if (article_storage[i].fisrt == 0 && article_storage[i].second == ""){
+            // 
+          }
+        }
+
       }
     } else {
       printf("Received unauthorized request symbol \"%c\"\n", req[0]);
