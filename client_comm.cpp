@@ -205,6 +205,10 @@ void BulletClient(string server_ip_addr,
       printf("(Range from 1 to %d): ", cache_length);
       int article_num;
       cin >> article_num;
+      if (article_num > cache_length || article_num <= 0) {
+        printf("Error: ut of range input number\n");
+        continue;
+      }
       // create a ViewReq packet
       string ViewReq = FormViewReqPacket(
         local_ip_addr,
