@@ -95,6 +95,10 @@ void SequentialServer(string coor_addr,
       // view full request
     } else if (req[0] == '0') {
       // unique id assignment reply
+    } else if (req[0] == 'A') {
+      // received a reply for a client's read/view request
+    } else if (req[0] == 'Q' && is_primary == true) {
+      // this is a primary server and received a query request
     } else {
       printf("Received unauthorized request symbol \"%c\"\n", req[0]);
     }

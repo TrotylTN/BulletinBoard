@@ -416,9 +416,9 @@ void ParseNumReplyPacket(string recv_packet, int &assigned_num) {
  * P[16:21]: local port
  * P[21]: 'A' for getting all articles, 'S' for getting a specific article
  * P[22]: 'A' for abstract (first 50 char), 'F' for full content (4000 max char)
- * P[22:26]: if getting all, where to start, if a specific, which one
- * P[26:41]: client id addr
- * P[41:46]: client port number
+ * P[23:27]: if getting all, where to start, if a specific, which one
+ * P[27:42]: client id addr
+ * P[42:47]: client port number
  */
 string FormQueryReqPacket(
   string local_addr,
@@ -429,7 +429,28 @@ string FormQueryReqPacket(
   string client_ip_addr,
   int client_port
 ) {
+    string res = "Q";
 
+    res += local_addr;
+    res += string(16 - res.length(), ' ');
+    // should be 16
+    res += to_string(local_port);
+    res += string(21 - res.length(), ' ');
+    // should be 21
+    res.push_back(all_or_specific);
+    res.push_back(abstract_or_full_content);
+    // should be 23 here
+    res += to_string(from_which_article);
+    res += string(27 - res.length(), ' ');
+    // should be 27 here
+    res += client_ip_addr;
+    res += string(42 - res.length(), ' ');
+    // should be 42
+    res += to_string(client_port);
+    res += string(47 - res.length(), ' ');
+    // should be 47 here
+
+    return res;
 }
 
 void ParseQueryReqPacket(
@@ -442,7 +463,24 @@ void ParseQueryReqPacket(
   string &client_ip_addr,
   int &client_port
 ) {
+  // 1-16
+  remote_ip = remove_all_end_spaces(recv_packet.substr(1, 15));
+  // 16-21
+  string remote_port_str = remove_all_end_spaces(recv_packet.substr(16, 5));
+  remote_port = stoi(remote_port_str, nullptr);
+  // 21,22
+  all_or_specific = recv_packet[21];
+  abstract_or_full_content = recv_packet[22];
+  // 23-27
+  string article_str = remove_all_end_spaces(recv_packet.substr(23, 4));
+  from_which_article = stoi(article_str, nullptr);
+  // 27-42
+  client_ip_addr = remove_all_end_spaces(recv_packet.substr(27, 15));
+  // 42-47
+  string client_port_str = remove_all_end_spaces(recv_packet.substr(42, 5));
+  client_port = stoi(client_port_str, nullptr);
 
+  return;
 }
 
 
@@ -464,7 +502,26 @@ string FormQueryReplyPacket(
   int client_port,
   string full_content
 ) {
+  string res = "A";
 
+  res += to_string(total_packet_sent);
+  res += string(5 - res.length(), ' ');
+  // should be 5
+  res += to_string(unique_id_this_article);
+  res += string(9 - res.length(), ' ');
+  // should be 9
+  res += to_string(reply_to_num);
+  res += string(13 - res.length(), ' ');
+  // should be 13 here
+  res += client_ip_addr;
+  res += string(28 - res.length(), ' ');
+  // should be 28 here, ip max length is 15
+  res += to_string(client_port);
+  res += string(33 - res.length(), ' ');
+  // should be 33
+  res += full_content;
+  // max 4033 < 4096
+  return res;
 }
 
 void ParseQueryReplyPacket(
@@ -476,5 +533,21 @@ void ParseQueryReplyPacket(
   int &client_port,
   string &full_content
 ) {
-
+  // 1-5
+  string total_packet_str = remove_all_end_spaces(recv_packet.substr(1, 4));
+  total_packet_str = stoi(total_packet_str, nullptr);
+  // 5-9
+  string unique_id_str = remove_all_end_spaces(recv_packet.substr(5, 4));
+  unique_id_this_article = stoi(unique_id_str, nullptr);
+  // 9-13
+  string reply_to_num_str = remove_all_end_spaces(recv_packet.substr(9, 4));
+  reply_to_num = stoi(reply_to_num_str, nullptr);
+  // 13-28
+  client_ip_addr = remove_all_end_spaces(recv_packet.substr(13, 15));
+  // 28-33
+  string client_port_str = remove_all_end_spaces(recv_packet.substr(28, 5));
+  client_port = stoi(client_port_str, nullptr);
+  // 33: max 4000
+  full_content = recv_packet.substr(33);
+  return;
 }
