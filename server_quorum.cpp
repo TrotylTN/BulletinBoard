@@ -558,6 +558,7 @@ void QuorumServerCoor(string self_addr,
               reply_for_view_id = unique_id;
               reply_for_view_replyto = reply_to_num;
               reply_for_view_content = full_content;
+              cerr << reply_for_view_id << endl;
             }
           } else {
             // this is replies for Read
@@ -662,15 +663,15 @@ void QuorumServerCoor(string self_addr,
               printf("Error: met error in sending Read Reply out\n");
               continue;
             }
-            printf(
-              "%d abstracts sent to <%s:%d>\n",
-              total_packets,
-              requester_ip.c_str(),
-              requester_port
-            );
+
           }
         }
-
+        printf(
+          "%d abstracts sent to <%s:%d>\n",
+          total_packets,
+          requester_ip.c_str(),
+          requester_port
+        );
       }
     } else {
       printf("Received unauthorized request symbol \"%c\"\n", req[0]);
