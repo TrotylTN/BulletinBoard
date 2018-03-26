@@ -594,5 +594,33 @@ void SequentialServer(string coor_addr,
 void SequentialServerCoor(string self_addr,
                           int self_port,
                           int socket_fd) {
-  return;
+  // stored important information
+  string primary_ip = "";
+  vector<string> server_list;
+
+  char buf[4096];
+  struct sockaddr_in si_other;
+  socklen_t socketlen = sizeof(si_other);
+
+  while (true) {
+    // start to receive incoming messages
+    if (
+      recvfrom(
+        socket_fd,
+        buf,
+        4096,
+        0,
+        (struct sockaddr *) &si_other,
+        &socketlen
+      ) < 0
+    ) {
+      continue;
+    }
+
+    string req = string(buf);
+
+    if (req[0] == 'S') {
+
+    }
+  }
 }

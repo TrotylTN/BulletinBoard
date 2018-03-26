@@ -260,3 +260,17 @@ void ParseBroadcastPacket(
  */
 string FormPrimaryAccessPacket(string ip_addr);
 void ParsePrimaryAccessPacket(string recv_packet, string &ip_addr);
+
+/*
+ * P[0]: S
+ * P[1:16]: ip addr
+ * P[16:21]: port number
+ * P[21]: mode number
+ */
+string FormServerRegPacket(string ip_addr, int port_num, char mode_num);
+void ParseServerRegPacket(
+  string recv_packet,
+  string &ip_addr,
+  int &port_num,
+  char &mode_num
+);

@@ -645,3 +645,36 @@ string FormPrimaryAccessPacket(string ip_addr) {
 void ParsePrimaryAccessPacket(string recv_packet, string &ip_addr) {
   ip_addr = recv_packet.substr(1);
 }
+
+/*
+ * P[0]: S
+ * P[1:16]: ip addr
+ * P[16:21]: port number
+ * P[21]: mode number
+ */
+string FormServerRegPacket(string ip_addr, int port_num, char mode_num) {
+  string res;
+  res += ip_addr;
+  res += string(16 - res.length(), ' ');
+  // should be 16
+  res += to_string(port_num);
+  res += string(21 - res.length(), ' ');
+  // should be 21
+  res.push_back(mode_num);
+
+  return res;
+}
+void ParseServerRegPacket(
+  string recv_packet,
+  string &ip_addr,
+  int &port_num,
+  char &mode_num
+) {
+  ip_addr = remove_all_end_spaces(recv_packet.substr(1, 15));
+
+  string port_num_str = remove_all_end_spaces(recv_packet.substr(16, 5));
+  port_num = stoi(port_num_str, nullptr);
+
+  mode_num = recv_packet[21];
+  return;
+}
