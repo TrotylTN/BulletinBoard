@@ -390,7 +390,7 @@ void ParseNumReqPacket(string recv_packet, string &remote_ip, int &remote_port){
 }
 
 /*
- * NumReq Sending Packet:
+ * Num Reply Sending Packet:
  * P[0]: 0
  * P[1:5]: Assigned number for the new article
  */
@@ -549,5 +549,48 @@ void ParseQueryReplyPacket(
   client_port = stoi(client_port_str, nullptr);
   // 33: max 4000
   full_content = recv_packet.substr(33);
+  return;
+}
+
+/*
+ * Broadcast Packet
+ * P[0]: B
+ * P[1:5]: article number
+ * P[5:9]: reply_to_num
+ * P[9:]: full content
+ */
+string FormBroadcastPacket(
+  int unique_id,
+  int reply_to_num,
+  string full_content
+) {
+  string res = "B";
+
+  res += to_string(unique_id);
+  res += string(5 - res.length(), ' ');
+  // should be 5
+  res += to_string(reply_to_num);
+  res += string(9 - res.length(),' ');
+  // should be 9
+  res += full_content;
+
+  return res;
+}
+
+void ParseBroadcastPacket(
+  string recv_packet,
+  int &unique_id,
+  int &reply_to_num,
+  string &full_content
+) {
+  // 1-5
+  string unique_id_str = remove_all_end_spaces(recv_packet.substr(1, 4));
+  unique_id = stoi(unique_id_str, nullptr);
+  // 5-9
+  string reply_to_num_str = remove_all_end_spaces(recv_packet.substr(5, 4));
+  reply_to_num = stoi(reply_to_num_str, nullptr);
+  // 9:
+  full_content = recv_packet.substr(9);
+
   return;
 }

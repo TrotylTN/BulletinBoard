@@ -183,10 +183,18 @@ void SequentialServer(string coor_addr,
       }
     } else if (req[0] == '0') {
       // unique id assignment reply
+      int reply_to_num = to_be_assigned_articles.front().first;
+      string article_content = to_be_assigned_articles.front().second;
+      int assigned_num;
+      ParseNumReplyPacket(req, assigned_num);
+
+
     } else if (req[0] == 'A') {
       // received a reply for a client's read/view request
     } else if (req[0] == 'Q' && is_primary == true) {
       // this is a primary server and received a query request
+    } else if (req[0] == 'B' && is_primary == true) {
+      // received an update as a primary server 
     } else {
       printf("Received unauthorized request symbol \"%c\"\n", req[0]);
     }

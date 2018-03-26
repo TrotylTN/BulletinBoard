@@ -158,7 +158,7 @@ void ParseNumReqPacket(
 );
 
 /*
- * NumReq Sending Packet:
+ * Num Reply Sending Packet:
  * P[0]: 0
  * P[1:5]: Assigned number for the new article
  */
@@ -221,5 +221,18 @@ void ParseQueryReplyPacket(
   int &reply_to_num,
   string &client_ip_addr,
   int &client_port,
+  string &full_content
+);
+
+string FormBroadcastPacket(
+  int unique_id,
+  int reply_to_num,
+  string full_content
+);
+
+void ParseBroadcastPacket(
+  string recv_packet,
+  int &unique_id,
+  int &reply_to_num,
   string &full_content
 );
