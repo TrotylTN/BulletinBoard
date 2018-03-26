@@ -566,7 +566,7 @@ void QuorumServerCoor(string self_addr,
       }
       // TODO: Here is hard code to calculate Nw and Nr
       Nw = server_list.size() / 2 + 1;
-      Nr = server_list.size() / 2;
+      Nr = server_list.size() / 2 + 1;
       int NN = server_list.size();
       printf("Currently we have %d servers, among them we", NN);
       printf(" have %d Read Servers and %d Write Servers\n\n", Nr, Nw);
@@ -627,10 +627,14 @@ void QuorumServerCoor(string self_addr,
       }
     } else if (req[0] == 'Q') {
       // forward Query request to all Nr server
+      string reply_for_view_packet = "";
+      char request_type;
+
       printf("Read request will be randomly sent to %d servers\n", Nr);
       random_shuffle(server_list.begin(), server_list.end());
       for (int i = 0; i < Nr; i++) {
         if (
+
           UDP_send_packet_socket(
             req.c_str(),
             server_list[i].first.c_str(),
@@ -640,11 +644,101 @@ void QuorumServerCoor(string self_addr,
             printf("Error: met error in sending NumReply out");
             continue;
           }
-          printf(
-            "  Read Request forwarded to <%s:%d>\n",
-            server_list[i].first.c_str(),
-            server_list[i].second
+        printf(
+          "  Read Request forwarded to <%s:%d>\n",
+          server_list[i].first.c_str(),
+          server_list[i].second
+        );
+        if (
+          recvfrom(
+            socket_fd,
+            buf,
+            4096,
+            0,
+            (struct sockaddr *) &si_other,
+            &socketlen
+          ) < 0
+        ) {
+          continue;
+        }
+
+        string req = string(buf);
+
+        if (req[0] == 'A') {
+          // received a reply for a client's read/view request
+          int total_packets, unique_id, reply_to_num;
+          string client_ip;
+          int client_port, updated_length;
+          string full_content;
+          ParseQueryReplyPacket(
+            req,
+            total_packets,
+            unique_id,
+            reply_to_num,
+            client_ip,
+            client_port,
+            updated_length,
+            request_type,
+            full_content
           );
+          if (request_type == 'V') {
+            // this is a reply for View
+            if (full_content != "")
+            // mark the view packet
+              reply_for_view_packet = req;
+          } else {
+            // this is replies for Read
+            if (total_packets == 0) {
+              // ignore it
+            }
+            // forward the first packet to client
+            article_storage[unique_id] = make_pair(reply_to_num, full_content);
+            storage_length = max(updated_length, storage_length);
+            int rest_packets = total_packets - 1;
+            // continue to receive packets, and do forwarding
+            while (rest_packets > 0) {
+              if (
+                recvfrom(
+                  socket_fd,
+                  buf,
+                  4096,
+                  0,
+                  (struct sockaddr *) &si_other,
+                  &socketlen
+                ) < 0
+              ) {
+                continue;
+              }
+              string req = string(buf);
+              if (req[0] != 'A') {
+                printf("Error: Received unexpected message during forward\n");
+                return;
+              }
+              ParseQueryReplyPacket(
+                req,
+                total_packets,
+                unique_id,
+                reply_to_num,
+                client_ip,
+                client_port,
+                updated_length,
+                request_type,
+                full_content
+              );
+              article_storage[unique_id] = make_pair(reply_to_num, full_content);
+              storage_length = max(updated_length, storage_length);
+              rest_packets --;
+            }
+          }
+        } else {
+          continue;
+        }
+      }
+      // sending results back to requester server
+      if (request_type == 'V') {
+        // send this packet to the requester server
+      } else {
+        // send all articles to the requester server
       }
     } else {
       printf("Received unauthorized request symbol \"%c\"\n", req[0]);
