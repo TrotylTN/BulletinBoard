@@ -37,6 +37,9 @@ void QuorumServer(string coor_addr,
     }
 
     string req = string(buf);
+
+    cerr << req << endl;
+
     if (req[0] == 'C') {
       // ping request
       string remote_ip;
