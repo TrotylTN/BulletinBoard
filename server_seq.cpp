@@ -104,17 +104,18 @@ void SequentialServer(string coor_addr,
         client_port,
         client_cache_length
       );
-      // queue the client into to_be_replied
-      to_be_replied_list.push_back(make_pair(client_ip, client_port));
       // send the request to the primary backup server
       if (is_primary == true) {
         // TODO: use local storage to reply
+
       } else {
-        // we send it to coordinator and let it forward to backup server
+        // queue the client into to_be_replied
+        to_be_replied_list.push_back(make_pair(client_ip, client_port));
+        // we send query to coordinator and let it forward to backup server
         string QueryReq = FormQueryReqPacket(
           self_addr,
           self_port,
-          'S',
+          'A',
           'A',
           client_cache_length,
           client_ip,
@@ -131,7 +132,7 @@ void SequentialServer(string coor_addr,
           continue;
         }
         printf(
-          "Read request for <%s:%d> from No.%d sent\n",
+          "Read request for <%s:%d> from No.%d sent to primary backup server\n",
           client_ip.c_str(),
           client_port,
           client_cache_length
@@ -139,6 +140,47 @@ void SequentialServer(string coor_addr,
       }
     } else if (req[0] == 'V') {
       // view full request
+      string client_ip;
+      int client_port, article_num;
+      ParseViewReqPacket(
+        req,
+        client_ip,
+        client_port,
+        article_num
+      );
+      if (is_primary) {
+        // TODO: use local storage to reply the client
+
+      } else {
+        // queue the client into to_be_replied
+        to_be_replied_list.push_back(make_pair(client_ip, client_port));
+        // we send query to coordinator and let it forward to backup server
+        string QueryReq = FormQueryReqPacket(
+          self_addr,
+          self_port,
+          'S',
+          'F',
+          article_num,
+          client_ip,
+          client_port
+        );
+        if (
+          UDP_send_packet_socket(
+            QueryReq.c_str(),
+            coor_addr.c_str(),
+            coor_port,
+            socket_fd
+          ) == -1) {
+          printf("Error: met error in sending Query Request out");
+          continue;
+        }
+        printf(
+          "View request for <%s:%d> for No.%d sent to primary backup server\n",
+          client_ip.c_str(),
+          client_port,
+          article_num
+        );
+      }
     } else if (req[0] == '0') {
       // unique id assignment reply
     } else if (req[0] == 'A') {
