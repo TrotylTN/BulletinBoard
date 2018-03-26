@@ -224,6 +224,13 @@ void ParseQueryReplyPacket(
   string &full_content
 );
 
+/*
+ * Broadcast Packet
+ * P[0]: B
+ * P[1:5]: article number
+ * P[5:9]: reply_to_num
+ * P[9:]: full content
+ */
 string FormBroadcastPacket(
   int unique_id,
   int reply_to_num,

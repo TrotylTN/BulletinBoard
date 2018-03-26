@@ -188,13 +188,45 @@ void SequentialServer(string coor_addr,
       int assigned_num;
       ParseNumReplyPacket(req, assigned_num);
 
+      // push this update to the back up server via coordinator
+      string broadcastpkt = FormBroadcastPacket(
+        assigned_num,
+        reply_to_num,
+        article_content
+      );
+      if (
+        UDP_send_packet_socket(
+          broadcastpkt.c_str(),
+          coor_addr.c_str(),
+          coor_port,
+          socket_fd
+        ) == -1) {
+        printf("Error: met error in sending Query Request out");
+        continue;
+      }
+      printf(
+        "Update for No.%d sent to primary backup server\n",
+        assigned_num
+      );
 
+      // pop the non-assigned article out
+      to_be_assigned_articles.pop();
     } else if (req[0] == 'A') {
       // received a reply for a client's read/view request
     } else if (req[0] == 'Q' && is_primary == true) {
       // this is a primary server and received a query request
     } else if (req[0] == 'B' && is_primary == true) {
-      // received an update as a primary server 
+      // received an update as a primary server
+      int unique_id, reply_to_num;
+      string article_content;
+      ParseBroadcastPacket(
+        req,
+        unique_id,
+        reply_to_num,
+        article_content
+      );
+      storage_length = max(storage_length, unique_id);
+      article_storage[unique_id] = make_pair(reply_to_num, article_content);
     } else {
       printf("Received unauthorized request symbol \"%c\"\n", req[0]);
     }
