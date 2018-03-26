@@ -19,6 +19,7 @@
 #include <vector>
 #include <queue>
 #include <utility>
+#include <algorithm>
 
 #define MAXCLIENT 100
 #define MAXSERVER 100
