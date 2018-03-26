@@ -634,7 +634,7 @@ void QuorumServerCoor(string self_addr,
       } else {
         // send all articles to the requester
         int total_packets = storage_length;
-        cerr << "store length"
+        cerr << "store length: " << storage_length << endl;
         for (int i = 1; i <= storage_length; i++) {
           if (article_storage[i].first == 0 && article_storage[i].second == ""){
             total_packets --;
