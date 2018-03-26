@@ -204,7 +204,8 @@ void ParseQueryReqPacket(
  * P[9:13]: this article's reply to number, if new article, here should be 0
  * P[13:28]: client ip addr
  * P[28:33]: client port number
- * P[33:]: Article content
+ * P[33,37]: updated length of storage
+ * P[37:]: Article content
  */
 string FormQueryReplyPacket(
   int total_packet_sent,
@@ -212,6 +213,7 @@ string FormQueryReplyPacket(
   int reply_to_num,
   string client_ip_addr,
   int client_port,
+  int updated_length,
   string full_content
 );
 void ParseQueryReplyPacket(
@@ -221,6 +223,7 @@ void ParseQueryReplyPacket(
   int &reply_to_num,
   string &client_ip_addr,
   int &client_port,
+  int &updated_length,
   string &full_content
 );
 

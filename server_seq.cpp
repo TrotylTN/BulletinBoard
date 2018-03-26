@@ -9,7 +9,8 @@ void SequentialServer(string coor_addr,
   // first: reply to #, second: content
   queue<pair<int, string> > to_be_assigned_articles;
   // first: remote ip addr, second: port num
-  vector<pair<string, int> > to_be_replied_list;
+  vector<pair<string, int> > to_be_replied_read;
+  vector<pair<string, int> > to_be_replied_view;
 
   // these two var are just for primary backup server's usage
   // first: reply to #, second: content
@@ -110,7 +111,7 @@ void SequentialServer(string coor_addr,
 
       } else {
         // queue the client into to_be_replied
-        to_be_replied_list.push_back(make_pair(client_ip, client_port));
+        to_be_replied_read.push_back(make_pair(client_ip, client_port));
         // we send query to coordinator and let it forward to backup server
         string QueryReq = FormQueryReqPacket(
           self_addr,
@@ -153,7 +154,7 @@ void SequentialServer(string coor_addr,
 
       } else {
         // queue the client into to_be_replied
-        to_be_replied_list.push_back(make_pair(client_ip, client_port));
+        to_be_replied_view.push_back(make_pair(client_ip, client_port));
         // we send query to coordinator and let it forward to backup server
         string QueryReq = FormQueryReqPacket(
           self_addr,
@@ -253,6 +254,7 @@ void SequentialServer(string coor_addr,
               article_storage[i].first,
               client_ip,
               client_port,
+              storage_length,
               sent_article
             );
             // send this packet to the connected server
@@ -286,6 +288,7 @@ void SequentialServer(string coor_addr,
           article_storage[start_position].first,
           client_ip,
           client_port,
+          storage_length,
           sent_article
         );
         // send this packet to the connected server

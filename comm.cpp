@@ -492,7 +492,8 @@ void ParseQueryReqPacket(
  * P[9:13]: this article's reply to number, if new article, here should be 0
  * P[13:28]: client ip addr
  * P[28:33]: client port number
- * P[33:]: Article content
+ * P[33,37]: updated length of storage
+ * P[37:]: Article content
  */
 string FormQueryReplyPacket(
   int total_packet_sent,
@@ -500,6 +501,7 @@ string FormQueryReplyPacket(
   int reply_to_num,
   string client_ip_addr,
   int client_port,
+  int updated_length,
   string full_content
 ) {
   string res = "A";
@@ -519,8 +521,10 @@ string FormQueryReplyPacket(
   res += to_string(client_port);
   res += string(33 - res.length(), ' ');
   // should be 33
+  res += to_string(updated_length);
+  res += string(37 - res.length(), ' ');
   res += full_content;
-  // max 4033 < 4096
+  // max 4037 < 4096
   return res;
 }
 
@@ -531,6 +535,7 @@ void ParseQueryReplyPacket(
   int &reply_to_num,
   string &client_ip_addr,
   int &client_port,
+  int &updated_length,
   string &full_content
 ) {
   // 1-5
@@ -547,8 +552,11 @@ void ParseQueryReplyPacket(
   // 28-33
   string client_port_str = remove_all_end_spaces(recv_packet.substr(28, 5));
   client_port = stoi(client_port_str, nullptr);
-  // 33: max 4000
-  full_content = recv_packet.substr(33);
+  // 33-37
+  string length_str = remove_all_end_spaces(recv_packet.substr(33, 4));
+  updated_length = stoi(length_str, nullptr);
+  // 37: max 4000
+  full_content = recv_packet.substr(37);
   return;
 }
 
