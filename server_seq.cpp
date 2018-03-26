@@ -595,8 +595,11 @@ void SequentialServerCoor(string self_addr,
                           int self_port,
                           int socket_fd) {
   // stored important information
+  int coor_mode_number = 1;
+  int total_article;
   string primary_ip = "";
-  vector<string> server_list;
+  int primary_port = -1;
+  vector< pair<string,int> > server_list;
 
   char buf[4096];
   struct sockaddr_in si_other;
@@ -620,7 +623,63 @@ void SequentialServerCoor(string self_addr,
     string req = string(buf);
 
     if (req[0] == 'S') {
+      // receive registration request from remote server
+      string remote_ip;
+      int remote_port;
+      char mode_num_no_use;
+      ParseServerRegPacket(
+        req,
+        remote_ip,
+        remote_port,
+        mode_num_no_use
+      );
+      // insert this server into the server list
+      server_list.push_back(make_pair(remote_ip, remote_port));
 
+      string ReplyMessage = FormServerRegPacket(
+        remote_ip,
+        remote_port,
+        coor_mode_number
+      );
+      // return the mode number back to the remote server
+      if (
+        UDP_send_packet_socket(
+          ReplyMessage.c_str(),
+          remote_ip.c_str(),
+          remote_port,
+          socket_fd
+        ) == -1) {
+        printf("Error: met error in sending ServerReg out");
+        continue;
+      }
+      if (primary_port == -1) {
+        // this is the first server, set it to backup server
+        // give the server some minutes to start
+        usleep(1000);
+        // grant this server primary position
+        string PrimaryAccess = FormPrimaryAccessPacket(remote_ip, remote_port);
+        if (
+          UDP_send_packet_socket(
+            PrimaryAccess.c_str(),
+            remote_ip.c_str(),
+            remote_port,
+            socket_fd
+          ) == -1) {
+          printf("Error: met error in sending PrimaryAccess out");
+          continue;
+        }
+        primary_ip = remote_ip;
+        primary_port = remote_port;
+      }
+    } else if (req[0] == 'N') {
+      // receive unique id request
+
+    } else if (req[0] == 'B') {
+      // forward Broadcast request to primary server
+    } else if (req[0] == 'Q') {
+      // forward Query request to primary server
+    } else {
+      printf("Received unauthorized request symbol \"%c\"\n", req[0]);
     }
   }
 }

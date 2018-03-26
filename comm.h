@@ -257,9 +257,10 @@ void ParseBroadcastPacket(
  * Primary Granting
  * P[0]: 1
  * P[1:16]: primary server
+ * P[16:21]: port number
  */
-string FormPrimaryAccessPacket(string ip_addr);
-void ParsePrimaryAccessPacket(string recv_packet, string &ip_addr);
+string FormPrimaryAccessPacket(string ip_addr, int port_num);
+void ParsePrimaryAccessPacket(string recv_packet,string &ip_addr,int &port_num);
 
 /*
  * P[0]: S

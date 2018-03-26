@@ -28,7 +28,7 @@ int main() {
   if (setsockopt(local_socket_fd, SOL_SOCKET, SO_RCVTIMEO,&tv,sizeof(tv)) < 0) {
       perror("Set timeout error");
   }
-  
+
   // bind the socket to the specific port
   memset((char *) &si_me, 0, sizeof(si_me));
   si_me.sin_family = AF_INET;
@@ -60,25 +60,25 @@ int main() {
       } else {
         printf("Invalid number entered! Try again.\n\n");
       }
-      if (mode_num == 1) {
-        SequentialServerCoor(
-          local_ip_addr,
-          local_port_num,
-          local_socket_fd
-        );
-      } else if (mode_num == 2) {
-        QuorumServerCoor(
-          local_ip_addr,
-          local_port_num,
-          local_socket_fd
-        );
-      } else {
-        RAndWServerCoor(
-          local_ip_addr,
-          local_port_num,
-          local_socket_fd
-        );
-      }
+    }
+    if (mode_num == 1) {
+      SequentialServerCoor(
+        local_ip_addr,
+        local_port_num,
+        local_socket_fd
+      );
+    } else if (mode_num == 2) {
+      QuorumServerCoor(
+        local_ip_addr,
+        local_port_num,
+        local_socket_fd
+      );
+    } else {
+      RAndWServerCoor(
+        local_ip_addr,
+        local_port_num,
+        local_socket_fd
+      );
     }
 
     // start to initialize the coordinator server

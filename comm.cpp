@@ -636,14 +636,24 @@ void ParseBroadcastPacket(
  * Primary Granting
  * P[0]: 1
  * P[1:16]: primary server
+ * P[16:21]: port number
  */
-string FormPrimaryAccessPacket(string ip_addr) {
+string FormPrimaryAccessPacket(string ip_addr, int port_num) {
   string res = "1";
   res += ip_addr;
+  res += string(16 - res.length(), ' ');
+
+  res += to_string(port_num);
+
   return res;
 }
-void ParsePrimaryAccessPacket(string recv_packet, string &ip_addr) {
-  ip_addr = recv_packet.substr(1);
+void ParsePrimaryAccessPacket(string recv_packet,string &ip_addr,int &port_num){
+  ip_addr = remove_all_end_spaces(recv_packet.substr(1,15));
+
+  string port_num_str = remove_all_end_spaces(recv_packet.substr(16, 5));
+  port_num = stoi(port_num_str, nullptr);
+
+  return;
 }
 
 /*
