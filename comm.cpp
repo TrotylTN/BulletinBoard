@@ -63,7 +63,19 @@ string remove_all_end_spaces(string s) {
 
 // print all caches out
 void PrintAllCaches(int n, pair<int, string> list_cache[10000]) {
-  // TODO
+  // TODO: changed to interesting form
+  for (int i = 1; i <= n; i++) {
+    if (list_cache[i].first == 0 && list_cache[i].second == "") {
+      // ignore
+    } else {
+      printf(
+        "%4d.%4d:%s",
+        i,
+        list_cache[i].first,
+        list_cache[i].second.c_str()
+      );
+    }
+  }
   return;
 }
 

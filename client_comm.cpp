@@ -150,7 +150,6 @@ void BulletClient(string server_ip_addr,
         // no need to update, continue directly
         printf("Local cache is already updated, no need to update again\n");
       } else {
-        // TODO: start a loop to receive
         printf("Received %d new articles/replies, updating...\n", new_length);
         list_cache[cur_num] = make_pair(reply_to_num, first_50_abstract);
         int rest_updates = total_packets - 1;
