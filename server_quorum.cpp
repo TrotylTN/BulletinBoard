@@ -5,14 +5,12 @@ void QuorumServer(string coor_addr,
                       string self_addr,
                       int self_port,
                       int socket_fd) {
-  bool is_primary = false;
   // first: reply to #, second: content
   queue<pair<int, string> > to_be_assigned_articles;
   // first: remote ip addr, second: port num
   vector<pair<string, int> > to_be_replied_read;
   vector<pair<string, int> > to_be_replied_view;
 
-  // these two var are just for primary backup server's usage
   // first: reply to #, second: content
   pair<int, string> article_storage[10000];
   int storage_length = 0;
@@ -39,11 +37,7 @@ void QuorumServer(string coor_addr,
     }
 
     string req = string(buf);
-    if (req[0] == '1') {
-      // became primary backup server;
-      is_primary = true;
-      printf("This server became Primary Backup Server\n");
-    } else if (req[0] == 'C') {
+    if (req[0] == 'C') {
       // ping request
       string remote_ip;
       int remote_port;
@@ -109,69 +103,7 @@ void QuorumServer(string coor_addr,
         client_port,
         client_cache_length
       );
-      // send the request to the primary backup server
-      if (is_primary == true) {
-        int start_position = client_cache_length;
-
-        int total_packets = storage_length - start_position;
-        if (total_packets <= 0) {
-          string ReadReply = FormReadReplyPacket(
-            storage_length,
-            0,
-            0,
-            0,
-            ""
-          );
-          if (
-            UDP_send_packet_socket(
-              ReadReply.c_str(),
-              client_ip.c_str(),
-              client_port,
-              socket_fd
-            ) == -1) {
-            printf("Error: met error in sending Read reply out");
-            continue;
-          }
-          // directly start next round of loop
-          continue;
-        }
-        // exclude the packets which has not been stored
-        for (int i = start_position + 1; i <= storage_length; i ++) {
-          if (article_storage[i].first == 0 && article_storage[i].second == "")
-            total_packets--;
-        }
-
-        for (int i = start_position + 1; i <= storage_length; i++) {
-          if (article_storage[i].first == 0 && article_storage[i].second == ""){
-            // ignore empty storage
-          } else {
-            // create the read reply packet
-            string ReadReply = FormReadReplyPacket(
-              storage_length,
-              i,
-              article_storage[i].first,
-              total_packets,
-              article_storage[i].second.substr(0,50)
-            );
-            if (
-              UDP_send_packet_socket(
-                ReadReply.c_str(),
-                client_ip.c_str(),
-                client_port,
-                socket_fd
-              ) == -1) {
-              printf("Error: met error in sending Read reply out");
-              continue;
-            }
-          }
-        }
-        printf(
-          "Articles list sent for <%s:%d>\n",
-          client_ip.c_str(),
-          client_port
-        );
-
-      } else {
+      {
         // queue the client into to_be_replied
         to_be_replied_read.push_back(make_pair(client_ip, client_port));
         // we send query to coordinator and let it forward to backup server
@@ -195,7 +127,7 @@ void QuorumServer(string coor_addr,
           continue;
         }
         printf(
-          "Read request for <%s:%d> from No.%d sent to primary backup server\n",
+          "Read request for <%s:%d> from No.%d sent to coordinator server\n",
           client_ip.c_str(),
           client_port,
           client_cache_length
@@ -211,25 +143,7 @@ void QuorumServer(string coor_addr,
         client_port,
         article_num
       );
-      if (is_primary) {
-        string ViewReply = FormViewReplyPacket(
-          article_num,
-          article_storage[article_num].first,
-          article_storage[article_num].second
-        );
-        if (
-          UDP_send_packet_socket(
-            ViewReply.c_str(),
-            client_ip.c_str(),
-            client_port,
-            socket_fd
-          ) == -1) {
-          printf("Error: met error in sending View reply out");
-          continue;
-        }
-        printf("View Reply sent to <%s:%d>\n", client_ip.c_str(), client_port);
-        continue;
-      } else {
+      {
         // queue the client into to_be_replied
         to_be_replied_view.push_back(make_pair(client_ip, client_port));
         // we send query to coordinator and let it forward to backup server
@@ -253,7 +167,7 @@ void QuorumServer(string coor_addr,
           continue;
         }
         printf(
-          "View request for <%s:%d> for No.%d sent to primary backup server\n",
+          "View request for <%s:%d> for No.%d sent to coordinator backup server\n",
           client_ip.c_str(),
           client_port,
           article_num
@@ -265,20 +179,7 @@ void QuorumServer(string coor_addr,
       string article_content = to_be_assigned_articles.front().second;
       int assigned_num;
       ParseNumReplyPacket(req, assigned_num);
-      if (is_primary) {
-        // store locally
-        if (storage_length >= 10000 || assigned_num >= 10000) {
-          printf("Storage is full...\n");
-          continue;
-        }
-        storage_length = max(storage_length, assigned_num);
-        article_storage[assigned_num] = make_pair(reply_to_num,article_content);
-        printf("Stored No.%d: %s\n", assigned_num, article_content.c_str());
-        to_be_assigned_articles.pop();
-        // directly enter next loop
-        continue;
-      }
-      // push this update to the back up server via coordinator
+      // push this update to the Nw servers via coordinator
       string broadcastpkt = FormBroadcastPacket(
         assigned_num,
         reply_to_num,
@@ -295,7 +196,7 @@ void QuorumServer(string coor_addr,
         continue;
       }
       printf(
-        "Update for No.%d sent to primary backup server\n",
+        "Update for No.%d sent to coordinator backup server\n",
         assigned_num
       );
 
@@ -445,8 +346,8 @@ void QuorumServer(string coor_addr,
           client_port
         );
       }
-    } else if (req[0] == 'Q' && is_primary == true) {
-      // this is a primary server and received a query request
+    } else if (req[0] == 'Q') {
+      // this is a coordinator server and received a query request
       string remote_ip;
       int remote_port;
       char is_get_all, is_full_content;
@@ -573,8 +474,8 @@ void QuorumServer(string coor_addr,
           remote_port
         );
       }
-    } else if (req[0] == 'B' && is_primary == true) {
-      // received an update as a primary server
+    } else if (req[0] == 'B') {
+      // received an update as writer server
       int unique_id, reply_to_num;
       string article_content;
       ParseBroadcastPacket(
@@ -601,13 +502,15 @@ void QuorumServer(string coor_addr,
 void QuorumServerCoor(string self_addr,
                       int self_port,
                       int socket_fd) {
+  srand(time(NULL));
   // stored important information
   char coor_mode_number = '2';
   // init total_article
   int total_article = 0;
-  string primary_ip = "";
-  int primary_port = -1;
   vector< pair<string,int> > server_list;
+  int Nw, Nr;
+  pair<int, string> article_storage[10000];
+  int storage_length = 0;
 
   char buf[4096];
   struct sockaddr_in si_other;
@@ -660,30 +563,12 @@ void QuorumServerCoor(string self_addr,
         printf("Error: met error in sending ServerReg out");
         continue;
       }
-      if (primary_port == -1) {
-        // this is the first server, set it to backup server
-        // give the server some minutes to start
-        usleep(1000);
-        // grant this server primary position
-        string PrimaryAccess = FormPrimaryAccessPacket(remote_ip, remote_port);
-        if (
-          UDP_send_packet_socket(
-            PrimaryAccess.c_str(),
-            remote_ip.c_str(),
-            remote_port,
-            socket_fd
-          ) == -1) {
-          printf("Error: met error in sending PrimaryAccess out");
-          continue;
-        }
-        primary_ip = remote_ip;
-        primary_port = remote_port;
-        printf(
-          "<%s:%d> became primary server\n",
-          remote_ip.c_str(),
-          remote_port
-        );
-      }
+      // TODO: Here is hard code to calculate Nw and Nr
+      Nw = server_list.size() / 2 + 1;
+      Nr = server_list.size() / 2 + 1;
+      int NN = server_list.size();
+      printf("Currently we have %d servers, among them we", NN);
+      printf(" have %d Read Servers and %d Write Servers\n\n", Nr, Nw);
     } else if (req[0] == 'N') {
       // receive unique id request
       if (total_article < 9999) {
@@ -719,30 +604,140 @@ void QuorumServerCoor(string self_addr,
         printf("Error: articles number is over the limit 9999\n");
       }
     } else if (req[0] == 'B') {
-      // forward Broadcast request to primary server
-
-      // forward it to primary back up server
-      if (
-        UDP_send_packet_socket(
-          req.c_str(),
-          primary_ip.c_str(),
-          primary_port,
-          socket_fd
-        ) == -1) {
-        printf("Error: met error in sending NumReply out");
-        continue;
+      // forward Broadcast request to random Nw servers
+      printf("Write request will be randomly sent to %d servers\n", Nw);
+      random_shuffle(server_list.begin(), server_list.end());
+      for (int i = 0; i < Nw; i++) {
+        if (
+          UDP_send_packet_socket(
+            req.c_str(),
+            server_list[i].first.c_str(),
+            server_list[i].second,
+            socket_fd
+          ) == -1) {
+            printf("Error: met error in sending NumReply out");
+            continue;
+          }
+        printf(
+          "  Write Request forwarded to <%s:%d>\n",
+          server_list[i].first.c_str(),
+          server_list[i].second
+        );
       }
     } else if (req[0] == 'Q') {
-      // forward Query request to primary server
-      if (
-        UDP_send_packet_socket(
-          req.c_str(),
-          primary_ip.c_str(),
-          primary_port,
-          socket_fd
-        ) == -1) {
-        printf("Error: met error in sending NumReply out");
-        continue;
+      // forward Query request to all Nr server
+      string reply_for_view_packet = "";
+      char request_type;
+
+      printf("Read request will be randomly sent to %d servers\n", Nr);
+      random_shuffle(server_list.begin(), server_list.end());
+      for (int i = 0; i < Nr; i++) {
+        if (
+
+          UDP_send_packet_socket(
+            req.c_str(),
+            server_list[i].first.c_str(),
+            server_list[i].second,
+            socket_fd
+          ) == -1) {
+            printf("Error: met error in sending NumReply out");
+            continue;
+          }
+        printf(
+          "  Read Request forwarded to <%s:%d>\n",
+          server_list[i].first.c_str(),
+          server_list[i].second
+        );
+        if (
+          recvfrom(
+            socket_fd,
+            buf,
+            4096,
+            0,
+            (struct sockaddr *) &si_other,
+            &socketlen
+          ) < 0
+        ) {
+          continue;
+        }
+
+        string req = string(buf);
+
+        if (req[0] == 'A') {
+          // received a reply for a client's read/view request
+          int total_packets, unique_id, reply_to_num;
+          string client_ip;
+          int client_port, updated_length;
+          string full_content;
+          ParseQueryReplyPacket(
+            req,
+            total_packets,
+            unique_id,
+            reply_to_num,
+            client_ip,
+            client_port,
+            updated_length,
+            request_type,
+            full_content
+          );
+          if (request_type == 'V') {
+            // this is a reply for View
+            if (full_content != "")
+            // mark the view packet
+              reply_for_view_packet = req;
+          } else {
+            // this is replies for Read
+            if (total_packets == 0) {
+              // ignore it
+            }
+            // forward the first packet to client
+            article_storage[unique_id] = make_pair(reply_to_num, full_content);
+            storage_length = max(updated_length, storage_length);
+            int rest_packets = total_packets - 1;
+            // continue to receive packets, and do forwarding
+            while (rest_packets > 0) {
+              if (
+                recvfrom(
+                  socket_fd,
+                  buf,
+                  4096,
+                  0,
+                  (struct sockaddr *) &si_other,
+                  &socketlen
+                ) < 0
+              ) {
+                continue;
+              }
+              string req = string(buf);
+              if (req[0] != 'A') {
+                printf("Error: Received unexpected message during forward\n");
+                return;
+              }
+              ParseQueryReplyPacket(
+                req,
+                total_packets,
+                unique_id,
+                reply_to_num,
+                client_ip,
+                client_port,
+                updated_length,
+                request_type,
+                full_content
+              );
+              article_storage[unique_id] = make_pair(reply_to_num, full_content);
+              storage_length = max(updated_length, storage_length);
+              rest_packets --;
+            }
+          }
+        } else {
+          continue;
+        }
+      }
+      // sending results back to requester server
+      if (request_type == 'V') {
+        // send this packet to the requester server
+      } else {
+        // send all articles to the requester server
       }
     } else {
       printf("Received unauthorized request symbol \"%c\"\n", req[0]);
