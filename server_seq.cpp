@@ -286,6 +286,7 @@ void SequentialServer(string coor_addr,
       to_be_assigned_articles.pop();
     } else if (req[0] == 'A') {
       // received a reply for a client's read/view request
+
     } else if (req[0] == 'Q' && is_primary == true) {
       // this is a primary server and received a query request
       string remote_ip;
@@ -328,6 +329,7 @@ void SequentialServer(string coor_addr,
               client_ip,
               client_port,
               storage_length,
+              'R',      // this is a read-all request
               sent_article
             );
             // send this packet to the connected server
@@ -362,6 +364,7 @@ void SequentialServer(string coor_addr,
           client_ip,
           client_port,
           storage_length,
+          'V',    // this is a specific article
           sent_article
         );
         // send this packet to the connected server

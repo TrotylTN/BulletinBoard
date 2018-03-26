@@ -503,7 +503,8 @@ void ParseQueryReqPacket(
  * P[13:28]: client ip addr
  * P[28:33]: client port number
  * P[33,37]: updated length of storage
- * P[37:]: Article content
+ * P[37]: this request type, 'V' stands for View, 'R' stands for Read
+ * P[38:]: Article content
  */
 string FormQueryReplyPacket(
   int total_packet_sent,
@@ -512,6 +513,7 @@ string FormQueryReplyPacket(
   string client_ip_addr,
   int client_port,
   int updated_length,
+  char request_type,
   string full_content
 ) {
   string res = "A";
@@ -533,6 +535,8 @@ string FormQueryReplyPacket(
   // should be 33
   res += to_string(updated_length);
   res += string(37 - res.length(), ' ');
+
+  res.push_back(request_type);
   res += full_content;
   // max 4037 < 4096
   return res;
@@ -546,6 +550,7 @@ void ParseQueryReplyPacket(
   string &client_ip_addr,
   int &client_port,
   int &updated_length,
+  char &request_type,
   string &full_content
 ) {
   // 1-5
@@ -566,7 +571,9 @@ void ParseQueryReplyPacket(
   string length_str = remove_all_end_spaces(recv_packet.substr(33, 4));
   updated_length = stoi(length_str, nullptr);
   // 37: max 4000
-  full_content = recv_packet.substr(37);
+  request_type = recv_packet[37];
+  full_content = recv_packet.substr(38);
+  
   return;
 }
 

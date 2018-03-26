@@ -208,7 +208,8 @@ void ParseQueryReqPacket(
  * P[13:28]: client ip addr
  * P[28:33]: client port number
  * P[33,37]: updated length of storage
- * P[37:]: Article content
+ * P[37]: this request type, 'V' stands for View, 'R' stands for Read
+ * P[38:]: Article content
  */
 string FormQueryReplyPacket(
   int total_packet_sent,
@@ -217,6 +218,7 @@ string FormQueryReplyPacket(
   string client_ip_addr,
   int client_port,
   int updated_length,
+  char request_type,
   string full_content
 );
 void ParseQueryReplyPacket(
@@ -227,6 +229,7 @@ void ParseQueryReplyPacket(
   string &client_ip_addr,
   int &client_port,
   int &updated_length,
+  char &request_type,
   string &full_content
 );
 
