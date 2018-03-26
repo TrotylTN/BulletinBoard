@@ -553,7 +553,7 @@ void QuorumServerCoor(string self_addr,
           requester_port = client_port;
           if (request_type == 'V') {
             // this is a reply for View
-            if (reply_for_view_content != "") {
+            if (unique_id != 0) {
               // mark the view packet
               reply_for_view_id = unique_id;
               reply_for_view_replyto = reply_to_num;
