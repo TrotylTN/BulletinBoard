@@ -273,7 +273,7 @@ void SequentialServer(string coor_addr,
         }
         storage_length = max(storage_length, assigned_num);
         article_storage[assigned_num] = make_pair(reply_to_num,article_content);
-        printf("Stored No.%d\n", assigned_num);
+        printf("Stored No.%d: %s\n", assigned_num, article_content.c_str());
         to_be_assigned_articles.pop();
         // directly enter next loop
         continue;

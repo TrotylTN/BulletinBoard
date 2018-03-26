@@ -127,7 +127,7 @@ bool ParsePingACKPacket(string rev_packet) {
  * P[1:16]: Source IP
  * P[16:21]: Source port
  * P[21:25]: Reply-to number, if zero, means this is a new article\
- * P[25:]: article content
+ * P[25:4025]: article content
  * we assume all incoming args are valid
  */
 string FormPostPacket(string local_addr,
@@ -150,6 +150,7 @@ string FormPostPacket(string local_addr,
   res += string(25 - cur_len, ' ');
   // so far length should be 25
   res += article_content;
+  res += string(4025 - cur_len, ' ');
 
   return res;
 }
@@ -170,7 +171,7 @@ void ParsePostReqPacket(string rev_packet,
   string reply_to_num_str = remove_all_end_spaces(rev_packet.substr(21, 4));
   reply_to_num = stoi(reply_to_num_str, nullptr);
 
-  article_content = rev_packet.substr(25);
+  article_content = remove_all_end_spaces(rev_packet.substr(25, 4000));
 
   return;
 }
@@ -554,7 +555,7 @@ string FormQueryReplyPacket(
   res += full_content;
   res += string(4038 - res.length(), ' ');
   // max 4037 < 4096
-  
+
   return res;
 }
 
