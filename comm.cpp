@@ -61,9 +61,43 @@ string remove_all_end_spaces(string s) {
   return s;
 }
 
+void dfs_print(
+  int space_len,
+  int idx,
+  vector<int> rel[10000],
+  bool visited[10000],
+  pair<int, string> list_cache[10000]
+) {
+  space_len = min(space_len, 65);
+  visited[idx] = true;
+  cout << string(space_len, ' ');
+  printf("%4d.", idx);
+  cout << list_cache[idx].second.substr(0, min(50, 75 - space_len)) << endl;
+  for (int i = 0; i < rel[idx].size(); i++) {
+    dfs_print(space_len + 1, rel[idx][i], rel, visited, list_cache);
+  }
+}
+
 // print all caches out
 void PrintAllCaches(int n, pair<int, string> list_cache[10000]) {
-  // TODO: changed to interesting form
+  vector<int> rel[10000];
+  bool visited[10000];
+
+  memset(visited, 0, sizeof visited);
+  for (int i = 1; i <= n; i++) {
+    rel[i].clear();
+  }
+
+  for (int i = 1; i <= n; i++) {
+    if (list_cache[i].first > 0) {
+      rel[list_cache[i].first].push_back(i);
+    }
+  }
+  for (int i = 1; i <= n; i++) {
+    if (!visited[i])
+      dfs_print(0, i, rel, visited, list_cache);
+  }
+  /*
   for (int i = 1; i <= n; i++) {
     if (list_cache[i].first == 0 && list_cache[i].second == "") {
       // ignore
@@ -76,6 +110,7 @@ void PrintAllCaches(int n, pair<int, string> list_cache[10000]) {
       );
     }
   }
+  */
   return;
 }
 
